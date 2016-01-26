@@ -1,13 +1,10 @@
 add multi frequency bandpass
-read config file and check 'model' parameter for each component
 
-remove samples, bandpass model. Add comment that options for bpass shapes will be added.
+pass scale_freqs only synch and out
 
-comment that default maps are smootehd to degree scale. Will add option for smoothing to experiment beam.
+check that 10. samples is sufficient
 
-input_dirr needs to go
-
-add option to include certain components
+remove bandpass_model parameter in function.
 
 output only the sum of chosen components by default
 

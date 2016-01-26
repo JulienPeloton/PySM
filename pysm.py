@@ -37,6 +37,7 @@ class component(object):
 
 class output(object):
     def __init__(self, config_dict):
+        self.components = [i for i in config_dict['components'].split()]
         self.output_frequency = [float(i) for i in config_dict['output_frequency'].split()]
         self.output_units = [config_dict['output_units'][0],config_dict['output_units'][1:]]
         self.nside = int(config_dict['nside'])
@@ -76,13 +77,12 @@ def scale_freqs(model, freq, beta, freq_ref, freq_curve, beta_curve, temp, respo
 
         exit()
 
-def bandpass_integrated(model,output_frequency,beta, freq_ref, freq_curve, beta_curve, temp, weights_file, width, samples, bandpass_model):
+def bandpass_integrated(model,output_frequency,beta, freq_ref, freq_curve, beta_curve, temp, weights_file, width, bandpass_model,samples=10.):
 
-    if bandpass_model=="tophat":
-        band_freqs = np.asarray(output_frequency)[...,np.newaxis]+np.linspace(-width/2.,width/2.,num=samples)
-        return np.sum(scale_freqs(model,band_freqs,beta,freq_ref,freq_curve,beta_curve,temp),axis=np.ndim(band_freqs)-1)/samples
-    else:
-        return
+    band_freqs = np.asarray(output_frequency)[...,np.newaxis]+np.linspace(-width/2.,width/2.,num=samples)
+
+    return np.sum(scale_freqs(model,band_freqs,beta,freq_ref,freq_curve,beta_curve,temp),axis=np.ndim(band_freqs)-1)/samples
+
 
 
 # This generates correlated T,E,B and Phi maps                                             

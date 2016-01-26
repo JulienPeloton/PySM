@@ -26,6 +26,9 @@ if not os.path.exists(out.output_dir+o_sub): os.makedirs(out.output_dir+o_sub)
 with open(out.output_dir+o_sub+'main_config.ini','a') as configfile: Config.write(configfile)
 
 #Create synchrotron, dust, and cmb maps at output frequencies.
-pysm_synchrotron.main()
-pysm_thermaldust.main()
-pysm_cmb.main()
+if 'synchrotron' in out.components:
+    pysm_synchrotron.main()
+if 'thermaldust' in out.components:
+    pysm_thermaldust.main()
+if 'cmb' in out.components:
+    pysm_cmb.main()
