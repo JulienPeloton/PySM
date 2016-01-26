@@ -1,0 +1,67 @@
+from ConfigParser import SafeConfigParser
+import os
+
+Config = SafeConfigParser()
+
+ConfigFilePath = os.path.abspath(__file__)
+ConfigFileDir =  os.path.split(ConfigFilePath)[0]
+
+cfgfile = open(os.path.join(ConfigFileDir,"pysm_config.ini"),'w')
+
+input_dir = ConfigFileDir+'/Ancillaries/'
+output_dir = ConfigFileDir+'/Output/'
+
+Config.add_section('GlobalParameters')
+Config.set('GlobalParameters','output_frequency', '23. 44. 70. 100. 143. 217. 353. 545. 857.')
+Config.set('GlobalParameters','nside', '256')
+Config.set('GlobalParameters','output_units', 'uK_RJ')
+Config.set('GlobalParameters','output_dir',output_dir)
+
+Config.add_section('Bandpass')
+Config.set('Bandpass','bandpass_model','tophat')
+Config.set('Bandpass','width','5.')
+Config.set('Bandpass','samples','10.')
+Config.set('Bandpass','weights_file',os.path.join(input_dir,'weights_file.txt'))
+Config.set('Bandpass', 'bandpass','True')
+
+Config.add_section('ThermalDust')
+Config.set('ThermalDust','model','thermaldust')
+Config.set('ThermalDust','freq_ref','545.')
+Config.set('ThermalDust','template_units', 'uK_RJ')
+Config.set('ThermalDust','temp_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_temp.fits'))
+Config.set('ThermalDust','beta_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_beta.fits'))
+Config.set('ThermalDust','pol_freq_ref', '353.')
+Config.set('ThermalDust','polq_em_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_polq_em.fits'))
+Config.set('ThermalDust','polu_em_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_polu_em.fits'))
+Config.set('ThermalDust','em_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_em.fits'))
+Config.set('ThermalDust','output_dir', output_dir)
+Config.set('ThermalDust','freq_ref','21')
+Config.set('ThermalDust','curvefreq','23')
+Config.set('ThermalDust','beta_curve', '-0.3')
+
+Config.add_section('Synchrotron')
+Config.set('Synchrotron','model','powerlaw')
+Config.set('Synchrotron','template_units','MJysr')
+Config.set('Synchrotron','beta_template', os.path.join(input_dir,'Synchrotron/mamd2008/smoothed_synch_beta.fits'))
+Config.set('Synchrotron','em_template', os.path.join(input_dir,'Synchrotron/mamd2008/smoothed_synch_em.fits'))
+Config.set('Synchrotron','freq_ref', '23.')
+Config.set('Synchrotron','curvefreq', '23.')
+Config.set('Synchrotron','beta_curve', '-0.3')
+Config.set('Synchrotron','temp_template', os.path.join(input_dir,'ThermalDust/mbb/smoothed_dust_temp.fits'))
+Config.set('Synchrotron','output_dir', output_dir)
+Config.set('Synchrotron','polq_em_template',os.path.join(input_dir,'Synchrotron/mamd2008/smoothed_synch_polq_em.fits'))
+Config.set('Synchrotron','polu_em_template',os.path.join(input_dir,'Synchrotron/mamd2008/smoothed_synch_polu_em.fits'))
+Config.set('Synchrotron','pol_freq_ref','23.')
+
+Config.add_section('CMB')
+Config.set('CMB','input_spectra', os.path.join(input_dir,'CMB/taylens/camb_lenspotentialCls.dat'))
+Config.set('CMB','compute_lensed_cmb','True')
+Config.set('CMB','lensed_cmb', os.path.join(input_dir,'CMB/taylens/lensed_cmb.fits'))
+Config.set('CMB','order', '3')
+Config.set('CMB','output_dir',output_dir)
+
+Config.add_section('Noise')
+Config.set('Noise','output_dir',output_dir)
+
+Config.write(cfgfile)
+cfgfile.close()

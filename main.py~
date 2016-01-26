@@ -1,0 +1,31 @@
+import ConfigParser
+import pysm_synchrotron,pysm_thermaldust, pysm_cmb
+from pysm_packages.pysm import output
+import argparse, os
+
+parser = argparse.ArgumentParser(description='Main script for running the PySM.')
+parser.add_argument('-o','--o_sub',default='pysm_run/',help='Subdirectory under Output in which to store the run.')
+args=parser.parse_args()
+o_sub = args.o_sub
+
+##Get the output directory in order to save the configuration file.
+Config = ConfigParser.ConfigParser()
+Config.read('pysm_config.ini')
+out = output(Config._sections['GlobalParameters'])
+
+##Print information about the run:
+print '----------------------------------------------------- \n'
+print 'PYSM \n'
+print '----------------------------------------------------- \n'
+print ''.join("%s: %s \n" % item   for item in vars(out).items())
+print '-----------------------------------------------------'
+
+#Save the configuration file.
+if not os.path.exists(out.global_output_dir): os.makedirs(out.global_output_dir)
+if not os.path.exists(out.global_output_dir+o_sub): os.makedirs(out.global_output_dir+o_sub)
+with open(out.global_output_dir+o_sub+'pysm_config.ini','a') as configfile: Config.write(configfile)
+
+#Creat synchrotron, dust, and cmb maps at output frequencies.
+pysm_synchrotron.main()
+pysm_thermaldust.main()
+pysm_cmb.main()
