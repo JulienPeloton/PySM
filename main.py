@@ -1,6 +1,6 @@
 import ConfigParser
 import pysm_synchrotron,pysm_thermaldust, pysm_cmb
-from pysm_packages.pysm import output
+from pysm import output
 import argparse, os
 
 parser = argparse.ArgumentParser(description='Main script for running the PySM.')

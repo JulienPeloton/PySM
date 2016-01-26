@@ -8,19 +8,32 @@ units = ancillaries.units
 
 class component(object):
 
-    def __init__(self,config_dict):
-        self.model = config_dict['model']
-        self.em_template = hp.read_map(config_dict['em_template'],verbose=False)
-        self.beta_template = hp.read_map(config_dict['beta_template'],verbose=False)
-        self.temp_template = hp.read_map(config_dict['temp_template'],verbose=False)
-        self.curvefreq = float(config_dict['curvefreq'])
-        self.beta_curve = float(config_dict['beta_curve'])
-        self.polq_em_template = hp.read_map(config_dict['polq_em_template'],verbose=False)
-        self.polu_em_template = hp.read_map(config_dict['polu_em_template'],verbose=False)
-        self.freq_ref = float(config_dict['freq_ref'])
-        self.pol_freq_ref = float(config_dict['pol_freq_ref'])
-        self.template_units = [config_dict['template_units'][0],config_dict['template_units'][1:]]
-        self.output_dir = config_dict['output_dir']
+    def __init__(self,cdict):
+        keys = cdict.keys()
+        if 'model' in keys:
+            self.model = cdict['model']
+        if 'em_template' in keys:
+            self.em_template = hp.read_map(cdict['em_template'],verbose=False)
+        if 'beta_template' in keys:
+            self.beta_template = hp.read_map(config_dict['beta_template'],verbose=False)
+        if 'temp_template' in keys:
+            self.temp_template = hp.read_map(config_dict['temp_template'],verbose=False)
+        if 'curvefreq' in keys:
+            self.curvefreq = float(config_dict['curvefreq'])
+        if 'beta_curve' in keys:
+            self.beta_curve = float(config_dict['beta_curve'])
+        if 'polq_em_template' in keys: 
+            self.polq_em_template = hp.read_map(config_dict['polq_em_template'],verbose=False)
+        if 'polu_em_template' in keys:
+            self.polu_em_template = hp.read_map(config_dict['polu_em_template'],verbose=False)
+        if 'freq_ref' in keys:
+            self.freq_ref = float(config_dict['freq_ref'])
+        if 'pol_freq_ref' in keys:
+            self.pol_freq_ref = float(config_dict['pol_freq_ref'])
+        if 'template_units' in keys:
+            self.template_units = [config_dict['template_units'][0],config_dict['template_units'][1:]]
+        if 'output_dir' in keys:
+            self.output_dir = config_dict['output_dir']
 
 class output(object):
     def __init__(self, config_dict):
@@ -31,6 +44,22 @@ class output(object):
 
 def convert_units(u_from, u_to, freq): #freq in GHz
     return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
+
+#def scale_freqs(component,output,pol):
+
+##     freq = np.asarray(output.output_frequency)
+#     if pol ==True: freq
+
+#     if component.model=="curvepowerlaw": return (freq[...,np.newaxis]/component.freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
+#     elif component.model=="powerlaw": return (freq[...,np.newaxis]/component.freq_ref)**(component.beta_template)
+#     elif component.model=="thermaldust":
+###         exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/component.temp_template)
+#         exponent_ref=(constants['h']/constants['k_B'])*(component.freq_ref*1.e9/component.temp_template)
+#         return (freq[...,np.newaxis]/component.freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+#     else:
+#        print('No law selected')
+
+#        exit()
 
 def scale_freqs(model, freq, beta, freq_ref, freq_curve, beta_curve, temp, response=False, samples=100., width=10.):
     

@@ -1,7 +1,7 @@
 import numpy as np
 import healpy as hp
 import ConfigParser
-from pysm_packages.pysm import scale_freqs, convert_units, bandpass_integrated, output, component
+from pysm import scale_freqs, convert_units, bandpass_integrated, output, component
 
 def main():
 	

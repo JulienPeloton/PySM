@@ -1,6 +1,6 @@
 import numpy as np
 import healpy as hp
-from pysm_packages.pysm import *
+from pysm import *
 import ConfigParser
 
 def main():

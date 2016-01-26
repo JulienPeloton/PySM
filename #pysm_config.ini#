@@ -1,9 +1,14 @@
+input_dir = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/
+output_dir =  /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Output/
+
+models
+
 [GlobalParameters]
 output_frequency = 23. 44. 70. 100. 143. 217. 353. 545. 857.
 nside = 256
 output_units = uK_RJ
-output_dir = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Output/
-input_dirr = /mnt/users/groups/act/bthorne
+
+
 
 [Bandpass]
 bandpass_model = tophat
@@ -14,7 +19,7 @@ bandpass = True
 
 [ThermalDust]
 model = thermaldust
-freq_ref = 545.
+freq_ref = 21
 template_units = uK_RJ
 temp_template = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/ThermalDust/mbb/smoothed_dust_temp.fits
 beta_template = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/ThermalDust/mbb/smoothed_dust_beta.fits
