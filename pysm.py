@@ -11,36 +11,36 @@ class component(object):
     def __init__(self,cdict):
         keys = cdict.keys()
         if 'model' in keys:
-            self.model = cdict['model']
+            self.spectral_model = cdict['spectral_model']
         if 'em_template' in keys:
             self.em_template = hp.read_map(cdict['em_template'],verbose=False)
         if 'beta_template' in keys:
-            self.beta_template = hp.read_map(config_dict['beta_template'],verbose=False)
+            self.beta_template = hp.read_map(cdict['beta_template'],verbose=False)
         if 'temp_template' in keys:
-            self.temp_template = hp.read_map(config_dict['temp_template'],verbose=False)
+            self.temp_template = hp.read_map(cdict['temp_template'],verbose=False)
         if 'curvefreq' in keys:
-            self.curvefreq = float(config_dict['curvefreq'])
+            self.curvefreq = float(cdict['curvefreq'])
         if 'beta_curve' in keys:
-            self.beta_curve = float(config_dict['beta_curve'])
+            self.beta_curve = float(cdict['beta_curve'])
         if 'polq_em_template' in keys: 
-            self.polq_em_template = hp.read_map(config_dict['polq_em_template'],verbose=False)
+            self.polq_em_template = hp.read_map(cdict['polq_em_template'],verbose=False)
         if 'polu_em_template' in keys:
-            self.polu_em_template = hp.read_map(config_dict['polu_em_template'],verbose=False)
+            self.polu_em_template = hp.read_map(cdict['polu_em_template'],verbose=False)
         if 'freq_ref' in keys:
-            self.freq_ref = float(config_dict['freq_ref'])
+            self.freq_ref = float(cdict['freq_ref'])
         if 'pol_freq_ref' in keys:
-            self.pol_freq_ref = float(config_dict['pol_freq_ref'])
+            self.pol_freq_ref = float(cdict['pol_freq_ref'])
         if 'template_units' in keys:
-            self.template_units = [config_dict['template_units'][0],config_dict['template_units'][1:]]
+            self.template_units = [cdict['template_units'][0],cdict['template_units'][1:]]
         if 'output_dir' in keys:
-            self.output_dir = config_dict['output_dir']
+            self.output_dir = cdict['output_dir']
 
 class output(object):
     def __init__(self, config_dict):
         self.output_frequency = [float(i) for i in config_dict['output_frequency'].split()]
         self.output_units = [config_dict['output_units'][0],config_dict['output_units'][1:]]
         self.nside = int(config_dict['nside'])
-        self.global_output_dir = config_dict['output_dir']
+        self.output_dir = config_dict['output_dir']
 
 def convert_units(u_from, u_to, freq): #freq in GHz
     return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))

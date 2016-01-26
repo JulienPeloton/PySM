@@ -9,8 +9,10 @@ def main():
 	print '----------------------------------------------------- \n'
 #Read configuration into classes
 	Config = ConfigParser.ConfigParser()
-	Config.read('pysm_config.ini')
+	Config.read('main_config.ini')
 	out = output(Config._sections['GlobalParameters'])
+
+	Config.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
 	dust = component(Config._sections['ThermalDust'])
 
 #In this case the scaling is done in uK_RJ, so the unit conversionn is different to synchrotron.
@@ -19,12 +21,12 @@ def main():
 	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
 
 #Do the scaling.
-	scaled_map_dust = scale_freqs(dust.model,out.output_frequency,dust.beta_template,dust.freq_ref,None,None,dust.temp_template)*dust.em_template*unit_conversion
-	scaled_map_dust_polq = scale_freqs(dust.model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polq_em_template*unit_conversion
-	scaled_map_dust_polu = scale_freqs(dust.model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polu_em_template*unit_conversion
+	scaled_map_dust = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.freq_ref,None,None,dust.temp_template)*dust.em_template*unit_conversion
+	scaled_map_dust_polq = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polq_em_template*unit_conversion
+	scaled_map_dust_polu = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polu_em_template*unit_conversion
 
 	for i in range(0,len(out.output_frequency)):
 		d = [scaled_map_dust[i],scaled_map_dust_polq[i],scaled_map_dust_polu[i]]
-		hp.write_map(dust.output_dir+'pysm_run/'+'dust_%d.fits'%(out.output_frequency[i]),d,coord='G',column_units=out.output_units)
+		hp.write_map(out.output_dir+'pysm_run/'+'dust_%d.fits'%(out.output_frequency[i]),d,coord='G',column_units=out.output_units)
 
 	del dust, d

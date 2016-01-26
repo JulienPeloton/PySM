@@ -1,0 +1,18 @@
+add multi frequency bandpass
+read config file and check 'model' parameter for each component
+
+remove samples, bandpass model. Add comment that options for bpass shapes will be added.
+
+comment that default maps are smootehd to degree scale. Will add option for smoothing to experiment beam.
+
+input_dirr needs to go
+
+add option to include certain components
+
+output only the sum of chosen components by default
+
+add seed for numpy random stuff. np.random.seed(seed). do this in taylens (simulate_tebp_correlated) and in noise realisation.
+
+change polarisation scaling to just one call to scale_freqs.
+
+anywhere taylens appears refer to the taylens paper and github.

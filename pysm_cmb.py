@@ -7,7 +7,7 @@ def main():
 
 #Read config file.
 	Config = ConfigParser.ConfigParser()
-	Config.read('pysm_config.ini')
+	Config.read('main_config.ini')
 	out = output(Config._sections['GlobalParameters'])
 	cmb_order = Config.getint('CMB', 'order')
 	cmb_specs  = Config.get('CMB', 'input_spectra')
@@ -75,5 +75,5 @@ def main():
 
 	for i in out.output_frequency:
 		map_cmb= tuple([convert_units(['u','K_CMB'],['u','K_RJ'],i)*m for m in rm])
-		hp.write_map(out.global_output_dir+'pysm_run/'+'lensed_cmb_%d.fits'%(i),map_cmb,coord='G',column_units=out.output_units)
+		hp.write_map(out.output_dir+'pysm_run/'+'lensed_cmb_%d.fits'%(i),map_cmb,coord='G',column_units=out.output_units)
 

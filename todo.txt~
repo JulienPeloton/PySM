@@ -1,0 +1,2 @@
+add bandpass
+read config file and check 'model' parameter for each component

@@ -10,7 +10,7 @@ o_sub = args.o_sub
 
 ##Get the output directory in order to save the configuration file.
 Config = ConfigParser.ConfigParser()
-Config.read('pysm_config.ini')
+Config.read('main_config.ini')
 out = output(Config._sections['GlobalParameters'])
 
 ##Print information about the run:
@@ -21,9 +21,9 @@ print ''.join("%s: %s \n" % item   for item in vars(out).items())
 print '-----------------------------------------------------'
 
 #Save the configuration file.
-if not os.path.exists(out.global_output_dir): os.makedirs(out.global_output_dir)
-if not os.path.exists(out.global_output_dir+o_sub): os.makedirs(out.global_output_dir+o_sub)
-with open(out.global_output_dir+o_sub+'pysm_config.ini','a') as configfile: Config.write(configfile)
+if not os.path.exists(out.output_dir): os.makedirs(out.output_dir)
+if not os.path.exists(out.output_dir+o_sub): os.makedirs(out.output_dir+o_sub)
+with open(out.output_dir+o_sub+'main_config.ini','a') as configfile: Config.write(configfile)
 
 #Create synchrotron, dust, and cmb maps at output frequencies.
 pysm_synchrotron.main()

@@ -1,7 +1,7 @@
 input_dir = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/
 output_dir =  /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Output/
 
-models
+
 
 [GlobalParameters]
 output_frequency = 23. 44. 70. 100. 143. 217. 353. 545. 857.
