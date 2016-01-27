@@ -5,7 +5,7 @@ output_frequency = 23. 44. 70. 100. 143. 217. 353. 545. 857.
 nside = 256
 output_units = uK_RJ
 output_dir = /mnt/users/groups/act/bthorne/PySM/PySM/Output/
-debug == True
+debug == False
 
 [Bandpass]
 #An option for different bandpass shapes will be added in the future.

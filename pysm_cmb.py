@@ -75,8 +75,8 @@ def main():
 
 	if out.debug == True:
 		map_cmb = rm[:,np.newaxis,:]*convert_units(['u','K_CMB'],['u','K_RJ'],out.output_frequency)[np.newaxis,:,np.newaxis]
-		for i in out.output_frequency:
-			hp.write_map(out.output_dir+'lensed_cmb_%d.fits'&(i),map_cmb[:,i,:],coord='G',column_units=out.output_units)
+		for i in range(len(out.output_frequency)):
+			hp.write_map(out.output_dir+'lensed_cmb_%d.fits'%(out.output_frequency[i]),map_cmb[:,i,:],coord='G',column_units=out.output_units)
 
 	return rm[:,np.newaxis,:]*convert_units(['u','K_CMB'],['u','K_RJ'],out.output_frequency)[np.newaxis,\
 :,np.newaxis]

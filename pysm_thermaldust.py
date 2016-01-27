@@ -25,9 +25,9 @@ def main():
 	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion
 	
 	if out.debug == True:
+		dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 		for i in range(0,len(out.output_frequency)):
-			dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
-			hp.write_map(out.output_dir+'pysm_run/'+'dust_%d.fits'%(out.output_frequency[i]),dus[:,i,:],coord='G',column_units=out.output_units)
+			hp.write_map(out.output_dir+'dust_%d.fits'%(out.output_frequency[i]),dus[:,i,:],coord='G',column_units=out.output_units)
 
        	return np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 

@@ -27,7 +27,7 @@ def main():
 	if out.debug == True:
 		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
 		for i in range(0,len(out.output_frequency)):
-			hp.write_map(out.output_dir+'pysm_run/'+'synch_%d.fits'%(out.output_frequency[i]),syn[:,i,:],coord='G',column_units=out.output_units)
+			hp.write_map(out.output_dir+'synch_%d.fits'%(out.output_frequency[i]),syn[:,i,:],coord='G',column_units=out.output_units)
 
 	return np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
 

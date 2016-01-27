@@ -32,7 +32,7 @@ if 'cmb' in out.components:
 
 
 comps =str()
-for i in out.components: comps = comps+i[0]+'_'
+for i in sorted(out.components): comps = comps+i[0]+'_'
 fname = list()
 for i in range(len(out.output_frequency)): 
     fname.append(comps+str(out.output_frequency[i])+'.fits')
