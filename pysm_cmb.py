@@ -14,7 +14,7 @@ def main():
 	cmb_output = Config.get('CMB','output_dir')
 	compute_lensing = Config.getboolean('CMB','compute_lensed_cmb')
 
-#This code is edited from taylens code: Næss, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion — not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
+#This code is edited from taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion - not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
 #Available at: https://github.com/amaurea/taylens
 	
 	if compute_lensing == True:
@@ -74,8 +74,8 @@ def main():
 
 		print('Scaling a lensed cmb temperature map.')
 		print '----------------------------------------------------- \n'
-		rm = hp.read_map(Config.get('CMB','lensed_cmb'),field=(0,1,2),verbose=False)
-
+		rm = np.asarray(hp.read_map(Config.get('CMB','lensed_cmb'),field=(0,1,2),verbose=False))
+		
 	if out.debug == True:
 		map_cmb = rm[:,np.newaxis,:]*convert_units(['u','K_CMB'],['u','K_RJ'],out.output_frequency)[np.newaxis,:,np.newaxis]
 		for i in range(len(out.output_frequency)):

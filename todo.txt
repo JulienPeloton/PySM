@@ -2,18 +2,8 @@ add multi frequency bandpass
 
 make dust scaling compatible with bandpass filter
 
-add exceptions for existence of component models
-
-pass scale_freqs only synch and out
-
 check that 10. samples is sufficient
-
-remove bandpass_model parameter in function.
-
-output only the sum of chosen components by default
 
 add seed for numpy random stuff. np.random.seed(seed). do this in taylens (simulate_tebp_correlated) and in noise realisation.
 
-change polarisation scaling to just one call to scale_freqs.
 
-anywhere taylens appears refer to the taylens paper and github.
