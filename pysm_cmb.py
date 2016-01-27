@@ -73,7 +73,11 @@ def main():
 		print '----------------------------------------------------- \n'
 		rm = hp.read_map(Config.get('CMB','lensed_cmb'),field=(0,1,2),verbose=False)
 
-	for i in out.output_frequency:
-		map_cmb= tuple([convert_units(['u','K_CMB'],['u','K_RJ'],i)*m for m in rm])
-		hp.write_map(out.output_dir+'pysm_run/'+'lensed_cmb_%d.fits'%(i),map_cmb,coord='G',column_units=out.output_units)
+	if out.debug == True:
+		map_cmb = rm[:,np.newaxis,:]*convert_units(['u','K_CMB'],['u','K_RJ'],out.output_frequency)[np.newaxis,:,np.newaxis]
+		for i in out.output_frequency:
+			hp.write_map(out.output_dir+'lensed_cmb_%d.fits'&(i),map_cmb[:,i,:],coord='G',column_units=out.output_units)
+
+	return rm[:,np.newaxis,:]*convert_units(['u','K_CMB'],['u','K_RJ'],out.output_frequency)[np.newaxis,\
+:,np.newaxis]
 

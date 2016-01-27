@@ -1,5 +1,9 @@
 add multi frequency bandpass
 
+make dust scaling compatible with bandpass filter
+
+add exceptions for existence of component models
+
 pass scale_freqs only synch and out
 
 check that 10. samples is sufficient

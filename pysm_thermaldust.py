@@ -21,12 +21,15 @@ def main():
 	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
 
 #Do the scaling.
-	scaled_map_dust = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.freq_ref,None,None,dust.temp_template)*dust.em_template*unit_conversion
-	scaled_map_dust_polq = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polq_em_template*unit_conversion
-	scaled_map_dust_polu = scale_freqs(dust.spectral_model,out.output_frequency,dust.beta_template,dust.pol_freq_ref,None,None,dust.temp_template)*dust.polu_em_template*unit_conversion
+	scaled_map_dust = scale_freqs(dust,out,pol=False)*dust.em_template*unit_conversion
+	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion
+	
+	if out.debug == True:
+		for i in range(0,len(out.output_frequency)):
+			dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
+			hp.write_map(out.output_dir+'pysm_run/'+'dust_%d.fits'%(out.output_frequency[i]),dus[:,i,:],coord='G',column_units=out.output_units)
 
-	for i in range(0,len(out.output_frequency)):
-		d = [scaled_map_dust[i],scaled_map_dust_polq[i],scaled_map_dust_polu[i]]
-		hp.write_map(out.output_dir+'pysm_run/'+'dust_%d.fits'%(out.output_frequency[i]),d,coord='G',column_units=out.output_units)
+       	return np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 
-	del dust, d
+
+

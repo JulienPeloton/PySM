@@ -21,18 +21,15 @@ def main():
 	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
 #Do the scaling.
 
-#	scaled_map_synch = scale_freqs(synch,out,pol=False)*synch.em_template*unit_conversion
-#	scaled_map_synch_polu = scale_freqs(synch,out,pol=True)*synch.polu_em_template*unit_conversion
+	scaled_map_synch = scale_freqs(synch, out, pol=False)*synch.em_template*unit_conversion
+	scaled_map_synch_pol = scale_freqs(synch, out, pol=True)[np.newaxis,...]*np.array([synch.polq_em_template,synch.polu_em_template])[:,np.newaxis,:]*unit_conversion
 
-	scaled_map_synch = scale_freqs(synch.spectral_model,out.output_frequency,synch.beta_template,synch.freq_ref,synch.curvefreq,synch.beta_curve,None)*synch.em_template*unit_conversion
-	scaled_map_synch_polu = scale_freqs(synch.spectral_model,out.output_frequency,synch.beta_template,synch.pol_freq_ref,synch.curvefreq,synch.beta_curve,None)*synch.polu_em_template*unit_conversion
-	scaled_map_synch_polq = scale_freqs(synch.spectral_model,out.output_frequency,synch.beta_template,synch.pol_freq_ref,synch.curvefreq,synch.beta_curve,None)*synch.polq_em_template*unit_conversion
+	if out.debug == True:
+		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
+		for i in range(0,len(out.output_frequency)):
+			hp.write_map(out.output_dir+'pysm_run/'+'synch_%d.fits'%(out.output_frequency[i]),syn[:,i,:],coord='G',column_units=out.output_units)
 
-	for i in range(0,len(out.output_frequency)):
-		syn = [scaled_map_synch[i],scaled_map_synch_polq[i],scaled_map_synch_polu[i]]
-		hp.write_map(out.output_dir+'pysm_run/'+'synch_%d.fits'%(out.output_frequency[i]),syn,coord='G',column_units=out.output_units)
-
-	del synch, syn
+	return np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
 
 
 

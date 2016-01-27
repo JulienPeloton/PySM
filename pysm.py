@@ -10,6 +10,8 @@ class component(object):
 
     def __init__(self,cdict):
         keys = cdict.keys()
+        if 'pol' in keys:
+            self.pol = cdict['pol']
         if 'model' in keys:
             self.spectral_model = cdict['spectral_model']
         if 'em_template' in keys:
@@ -37,6 +39,7 @@ class component(object):
 
 class output(object):
     def __init__(self, config_dict):
+        self.debug = 'True' in config_dict['debug']
         self.components = [i for i in config_dict['components'].split()]
         self.output_frequency = [float(i) for i in config_dict['output_frequency'].split()]
         self.output_units = [config_dict['output_units'][0],config_dict['output_units'][1:]]
@@ -62,16 +65,18 @@ def convert_units(u_from, u_to, freq): #freq in GHz
 
 #        exit()
 
-def scale_freqs(model, freq, beta, freq_ref, freq_curve, beta_curve, temp, response=False, samples=100., width=10.):
+def scale_freqs(component, output, pol, samples=100., width=10.):
     
-     freq = np.asarray(freq)
+     freq = np.asarray(output.output_frequency)
+     if pol == False: freq_ref = component.freq_ref
+     if pol ==True: freq_ref = component.pol_freq_ref
 
-     if model=="curvepowerlaw": return (freq[...,np.newaxis]/freq_ref)**(beta+beta_curve*np.log10(freq[...,np.newaxis]/freq_curve))
-     elif model=="powerlaw": return (freq[...,np.newaxis]/freq_ref)**(beta)
-     elif model=="thermaldust":
-        exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/temp)
-        exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/temp)
-        return (freq[...,np.newaxis]/freq_ref)**(beta+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+     if component.spectral_model=="curvepowerlaw": return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
+     elif component.spectral_model=="powerlaw": return (freq[...,np.newaxis]/freq_ref)**component.beta_template
+     elif component.spectral_model=="thermaldust":
+        exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/component.temp_template)
+        exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/component.temp_template)
+        return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
      else:
         print('No law selected')
 

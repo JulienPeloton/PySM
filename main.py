@@ -1,12 +1,8 @@
-import ConfigParser
+import ConfigParser, os
 import pysm_synchrotron,pysm_thermaldust, pysm_cmb
 from pysm import output
-import argparse, os
-
-parser = argparse.ArgumentParser(description='Main script for running the PySM.')
-parser.add_argument('-o','--o_sub',default='pysm_run/',help='Subdirectory under Output in which to store the run.')
-args=parser.parse_args()
-o_sub = args.o_sub
+import healpy as hp
+import numpy as np
 
 ##Get the output directory in order to save the configuration file.
 Config = ConfigParser.ConfigParser()
@@ -22,13 +18,29 @@ print '-----------------------------------------------------'
 
 #Save the configuration file.
 if not os.path.exists(out.output_dir): os.makedirs(out.output_dir)
-if not os.path.exists(out.output_dir+o_sub): os.makedirs(out.output_dir+o_sub)
-with open(out.output_dir+o_sub+'main_config.ini','a') as configfile: Config.write(configfile)
+with open(out.output_dir+'main_config.ini','a') as configfile: Config.write(configfile)
+
+sky = np.zeros(hp.nside2npix(out.nside))
 
 #Create synchrotron, dust, and cmb maps at output frequencies.
 if 'synchrotron' in out.components:
-    pysm_synchrotron.main()
+    sky = pysm_synchrotron.main()
 if 'thermaldust' in out.components:
-    pysm_thermaldust.main()
+    sky = sky + pysm_thermaldust.main()
 if 'cmb' in out.components:
-    pysm_cmb.main()
+    sky = sky + pysm_cmb.main()
+
+
+comps =str()
+for i in out.components: comps = comps+i[0]+'_'
+fname = list()
+for i in range(len(out.output_frequency)): 
+    fname.append(comps+str(out.output_frequency[i])+'.fits')
+    hp.write_map(out.output_dir+fname[i],sky[:,i,:],coord='G',column_units=out.output_units)
+    print 'Written to '+out.output_dir+fname[i]
+
+print '-----------------------------------------------------\n'
+print 'PySM completed successfully. \n' 
+print '-----------------------------------------------------'
+
+exit()
