@@ -90,6 +90,9 @@ def bandpass_integrated(model,output_frequency,beta, freq_ref, freq_curve, beta_
 
 
 
+#This code is edited from the taylens code: Næss, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion — not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
+#Available at: https://github.com/amaurea/taylens
+
 # This generates correlated T,E,B and Phi maps                                             
 def simulate_tebp_correlated(cl_tebp_arr,nside,lmax) :
         alms=hp.synalm(cl_tebp_arr,lmax=lmax,new=True)

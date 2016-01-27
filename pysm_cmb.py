@@ -14,7 +14,8 @@ def main():
 	cmb_output = Config.get('CMB','output_dir')
 	compute_lensing = Config.getboolean('CMB','compute_lensed_cmb')
 
-####This is edited from taylens code.
+#This code is edited from taylens code: Næss, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion — not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
+#Available at: https://github.com/amaurea/taylens
 	
 	if compute_lensing == True:
 		
@@ -67,8 +68,10 @@ def main():
 		rm = apply_rotation(maps, rot)
 		np.save(cmb_output+'cmb_spec',cmb_specs)
 		hp.write_map(cmb_output+'lensed_cmb.fits',rm)
+
 	else:
 #option to use an already-computed lensed cmb map.	
+
 		print('Scaling a lensed cmb temperature map.')
 		print '----------------------------------------------------- \n'
 		rm = hp.read_map(Config.get('CMB','lensed_cmb'),field=(0,1,2),verbose=False)

@@ -1,0 +1,11 @@
+add multi frequency bandpass
+
+make dust scaling compatible with bandpass filter
+
+check that 10. samples is sufficient
+
+remove bandpass_model parameter in function.
+
+add seed for numpy random stuff. np.random.seed(seed). do this in taylens (simulate_tebp_correlated) and in noise realisation.
+
+anywhere taylens appears refer to the taylens paper and github.
