@@ -63,38 +63,51 @@ class output(object):
         self.nside = int(config_dict['nside'])
         self.output_dir = config_dict['output_dir']
         self.cmb_seed = config_dict['cmb_seed']
+        self.bandpass = 'True' in config_dict['bandpass']
+        self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
 
 def convert_units(u_from, u_to, freq): #freq in GHz
     return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
 
-def scale_freqs(component, output, pol, samples=100., width=10.):
+def scale_freqs(component, output, pol, samples=10.):
     
      freq = np.asarray(output.output_frequency)
-     if pol == False: freq_ref = component.freq_ref
-     if pol ==True: freq_ref = component.pol_freq_ref
 
-     if component.spectral_model=="curvepowerlaw": return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
-     elif component.spectral_model=="powerlaw": return (freq[...,np.newaxis]/freq_ref)**component.beta_template
+     if pol == False: freq_ref = component.freq_ref
+     if pol == True: freq_ref = component.pol_freq_ref
+
+     if output.bandpass == True: 
+         widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in output.bandpass_widths])
+         freq = freq[...,np.newaxis]+widths
+         print freq
+     if component.spectral_model=="curvepowerlaw": 
+         if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
+         else: return np.sum((freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve)),axis=np.ndim(freq)-1)/samples
+
+
+     elif component.spectral_model=="powerlaw": 
+         if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**component.beta_template
+         else: 
+             print (freq[...,np.newaxis]/freq_ref)**component.beta_template
+             return np.sum((freq[...,np.newaxis]/freq_ref)**component.beta_template,axis=np.ndim(freq)-1)/samples
+
      elif component.spectral_model=="thermaldust":
+
         exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/component.temp_template)
         exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/component.temp_template)
-        return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+
+        if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+        else: return np.sum((freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.)),axis=np.ndim(freq)-1)/samples
      else:
         print('No law selected')
 
         exit()
 
-def bandpass_integrated(component,out,width,samples=10.):
-
-    band_freqs = np.asarray(output_frequency)[...,np.newaxis]+np.linspace(-width/2.,width/2.,num=samples)
-
-    return np.sum(scale_freqs(model,band_freqs,beta,freq_ref,freq_curve,beta_curve,temp),axis=np.ndim(band_freqs)-1)/samples
-
 #This code is edited from the taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion -  not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
 #Available at: https://github.com/amaurea/taylens
 
 # This generates correlated T,E,B and Phi maps                                             
-def simulate_tebp_correlated(cl_tebp_arr,nside,lmax) :
+def simulate_tebp_correlated(cl_tebp_arr,nside,lmax):
         alms=hp.synalm(cl_tebp_arr,lmax=lmax,new=True)
         aphi=alms[-1]
         acmb=alms[0:-1]
