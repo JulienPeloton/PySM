@@ -37,8 +37,8 @@ class component(object):
             self.beta_template = hp.read_map(cdict['beta_template'],verbose=False)
         if 'temp_template' in keys:
             self.temp_template = hp.read_map(cdict['temp_template'],verbose=False)
-        if 'curvefreq' in keys:
-            self.curvefreq = float(cdict['curvefreq'])
+        if 'freq_curve' in keys:
+            self.freq_curve = float(cdict['freq_curve'])
         if 'beta_curve' in keys:
             self.beta_curve = float(cdict['beta_curve'])
         if 'polq_em_template' in keys: 
