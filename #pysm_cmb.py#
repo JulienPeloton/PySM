@@ -73,7 +73,7 @@ def main():
 
 		print('Scaling a lensed cmb temperature map.')
 		print '----------------------------------------------------- \n'
-		rm = np.array([i for i in CMB.lensed_cmb])
+		rm = np.array([i for i in CMB.lensed_cmb]) 
 		
 	if out.debug == True:
 		map_cmb = rm[:,np.newaxis,:]*scale_freqs(CMB,out)

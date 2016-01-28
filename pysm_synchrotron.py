@@ -1,12 +1,10 @@
 import numpy as np
 import healpy as hp
-from pysm import scale_freqs, convert_units, bandpass_integrated, component, output
+from pysm import scale_freqs, convert_units, component, output
 import ConfigParser
 
 def main():
 
-	print('Computing synchrotron map.')
-	print '----------------------------------------------------- \n'
 #Read in configuration file to classes.
 	Config = ConfigParser.ConfigParser()
 	Config.read('main_config.ini')
@@ -14,6 +12,11 @@ def main():
 
 	Config.read('./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini')
 	synch = component(Config._sections['Synchrotron'])
+
+	print('Computing synchrotron map with parameters:')
+	print '----------------------------------------------------- \n'
+	print ''.join("%s: %s \n" % item   for item in vars(synch).items())
+        print '----------------------------------------------------- \n'
 
 #The unit conversion takes care of the scaling being done in MJysr. After scaling we convert to whatever the output units are.
 	conv1 = convert_units(synch.template_units, ['M','Jysr'], synch.freq_ref)

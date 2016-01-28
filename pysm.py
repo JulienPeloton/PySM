@@ -29,7 +29,7 @@ class component(object):
         keys = cdict.keys()
         if 'pol' in keys:
             self.pol = cdict['pol']
-        if 'model' in keys:
+        if 'spectral_model' in keys:
             self.spectral_model = cdict['spectral_model']
         if 'em_template' in keys:
             self.em_template = hp.read_map(cdict['em_template'],verbose=False)
@@ -53,6 +53,14 @@ class component(object):
             self.template_units = [cdict['template_units'][0],cdict['template_units'][1:]]
         if 'output_dir' in keys:
             self.output_dir = cdict['output_dir']
+        if 'specs' in keys: 
+            self.specs = cdict['specs']
+        if 'cmb_seed' in keys:
+            self.cmb_seed = int(cdict['cmb_seed'])
+        if 'compute_lensed_cmb' in keys:
+            self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
+            if self.compute_lensed_cmb == False: self.lensed_cmb = hp.read_map(cdict['lensed_cmb'],field=(0,1,2),verbose=False)
+
 
 class output(object):
     def __init__(self, config_dict):
@@ -62,14 +70,13 @@ class output(object):
         self.output_units = [config_dict['output_units'][0],config_dict['output_units'][1:]]
         self.nside = int(config_dict['nside'])
         self.output_dir = config_dict['output_dir']
-        self.cmb_seed = config_dict['cmb_seed']
         self.bandpass = 'True' in config_dict['bandpass']
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
 
 def convert_units(u_from, u_to, freq): #freq in GHz
     return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
 
-def scale_freqs(component, output, pol, samples=10.):
+def scale_freqs(component, output, pol=None, samples=10.):
     
      freq = np.asarray(output.output_frequency)
 
@@ -79,31 +86,34 @@ def scale_freqs(component, output, pol, samples=10.):
      if output.bandpass == True: 
          widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in output.bandpass_widths])
          freq = freq[...,np.newaxis]+widths
-         print freq
+
+
      if component.spectral_model=="curvepowerlaw": 
          if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
          else: return np.sum((freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve)),axis=np.ndim(freq)-1)/samples
 
 
-     elif component.spectral_model=="powerlaw": 
+     if component.spectral_model=="powerlaw": 
          if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**component.beta_template
-         else: 
-             print (freq[...,np.newaxis]/freq_ref)**component.beta_template
-             return np.sum((freq[...,np.newaxis]/freq_ref)**component.beta_template,axis=np.ndim(freq)-1)/samples
+         else: return np.sum((freq[...,np.newaxis]/freq_ref)**component.beta_template,axis=np.ndim(freq)-1)/samples
 
-     elif component.spectral_model=="thermaldust":
 
+     if component.spectral_model=="thermaldust":
         exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/component.temp_template)
         exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/component.temp_template)
+        if output.bandpass == False: return convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+        else: return np.sum( convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis] * (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
 
-        if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
-        else: return np.sum((freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.)),axis=np.ndim(freq)-1)/samples
+
+     if  component.spectral_model=="cmb":
+         if output.bandpass == False: return convert_units(['u','K_CMB'],output.output_units,output.output_frequency)[np.newaxis,:,np.newaxis]
+         else: return np.sum(convert_units(['u','K_CMB'],output.output_units,output.output_frequency)[np.newaxis,:,np.newaxis], axis=np.ndim(freq)-1 ) / samples
+
      else:
         print('No law selected')
-
         exit()
 
-#This code is edited from the taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion -  not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
+#The following code is edited from the taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion -  not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
 #Available at: https://github.com/amaurea/taylens
 
 # This generates correlated T,E,B and Phi maps                                             

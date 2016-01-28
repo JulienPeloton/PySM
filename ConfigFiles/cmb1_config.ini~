@@ -1,0 +1,8 @@
+[CMB]
+spectral_model = cmb
+cmb_seed = 1234
+specs = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/CMB/taylens/camb_lenspotentialCls.dat
+compute_lensed_cmb = True
+lensed_cmb = /mnt/users/groups/act/bthorne/PySM/PySM-2.0/Ancillaries/CMB/taylens/lensed_cmb.fits
+
+

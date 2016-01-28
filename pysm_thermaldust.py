@@ -1,12 +1,10 @@
 import numpy as np
 import healpy as hp
 import ConfigParser
-from pysm import scale_freqs, convert_units, bandpass_integrated, output, component
+from pysm import scale_freqs, convert_units, output, component
 
 def main():
 	
-	print('Computing dust map using modified black body for a single component.')
-	print '----------------------------------------------------- \n'
 #Read configuration into classes
 	Config = ConfigParser.ConfigParser()
 	Config.read('main_config.ini')
@@ -15,8 +13,13 @@ def main():
 	Config.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
 	dust = component(Config._sections['ThermalDust'])
 
+	print('Computing dust map using modified black body for a single component with parameters:')
+	print '----------------------------------------------------- \n'
+	print ''.join("%s: %s \n" % item   for item in vars(dust).items())
+        print '----------------------------------------------------- \n'
+
 #In this case the scaling is done in uK_RJ, so the unit conversionn is different to synchrotron.
-	conv1 = convert_units(dust.template_units, ['u','K_RJ'], dust.freq_ref)
+	conv1 = convert_units(dust.template_units, ['M','Jysr'], dust.freq_ref)
 	conv2 = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
 	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
 
