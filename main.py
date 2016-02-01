@@ -3,6 +3,7 @@ import pysm_synchrotron,pysm_thermaldust, pysm_cmb
 from pysm import output
 import healpy as hp
 import numpy as np
+from astropy.io import fits
 
 ##Get the output directory in order to save the configuration file.
 Config = ConfigParser.ConfigParser()
@@ -10,8 +11,6 @@ Config.read('main_config.ini')
 out = output(Config._sections['GlobalParameters'])
 
 ##Print information about the run:
-print '----------------------------------------------------- \n'
-print 'PYSM \n'
 print '----------------------------------------------------- \n'
 print ''.join("%s: %s \n" % item   for item in vars(out).items())
 print '-----------------------------------------------------'

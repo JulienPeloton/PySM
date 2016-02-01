@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import healpy as hp, sys, time
 from scipy.misc import factorial, comb
+from scipy.interpolate import interp1d
 
 constants = {
     'T_CMB':2.7255,
@@ -60,7 +61,21 @@ class component(object):
         if 'compute_lensed_cmb' in keys:
             self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
             if self.compute_lensed_cmb == False: self.lensed_cmb = hp.read_map(cdict['lensed_cmb'],field=(0,1,2),verbose=False)
+        if 'emissivity' in keys:
+            self.emissivity = np.loadtxt(cdict['emissivity'],unpack=True)
+        if 'freq_peak' in keys:
+            try: self.freq_peak = float(cdict['freq_peak'])
+            except ValueError: self.freq_peak = hp.read_map(cdict['freq_peak'],verbose=False)
+        if 'peak_ref' in keys:
+            self.peak_ref = float(cdict['peak_ref'])
+            
 
+def spdust_scaling(c,o,pol=None):
+    freq = np.asarray(o.output_frequency)
+    f = interp1d(c.emissivity[0,:],c.emissivity[1,:],kind='cubic')
+    arg1 = freq[...,np.newaxis]*c.peak_ref/c.freq_peak
+    arg2 = c.freq_ref*c.peak_ref/c.freq_peak
+    return ((c.freq_ref/freq)**2)[...,np.newaxis]*(f(arg1)/f(arg2))
 
 class output(object):
     def __init__(self, config_dict):
@@ -76,38 +91,38 @@ class output(object):
 def convert_units(u_from, u_to, freq): #freq in GHz
     return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
 
-def scale_freqs(component, output, pol=None, samples=10.):
+def scale_freqs(c, o, pol=None, samples=10.):
     
-     freq = np.asarray(output.output_frequency)
+     freq = np.asarray(o.output_frequency)
 
-     if pol == False: freq_ref = component.freq_ref
-     if pol == True: freq_ref = component.pol_freq_ref
+     if pol == False: freq_ref = c.freq_ref
+     if pol == True: freq_ref = c.pol_freq_ref
 
-     if output.bandpass == True: 
-         widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in output.bandpass_widths])
+     if o.bandpass == True: 
+         widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in o.bandpass_widths])
          freq = freq[...,np.newaxis]+widths
 
 
-     if component.spectral_model=="curvepowerlaw": 
-         if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve))
-         else: return np.sum((freq[...,np.newaxis]/freq_ref)**(component.beta_template+component.beta_curve*np.log10(freq[...,np.newaxis]/component.freq_curve)),axis=np.ndim(freq)-1)/samples
+     if c.spectral_model=="curvepowerlaw": 
+         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log10(freq[...,np.newaxis]/c.freq_curve))
+         else: return np.sum((freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log10(freq[...,np.newaxis]/c.freq_curve)),axis=np.ndim(freq)-1)/samples
 
 
-     if component.spectral_model=="powerlaw": 
-         if output.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**component.beta_template
-         else: return np.sum((freq[...,np.newaxis]/freq_ref)**component.beta_template,axis=np.ndim(freq)-1)/samples
+     if c.spectral_model=="powerlaw": 
+         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**c.beta_template
+         else: return np.sum((freq[...,np.newaxis]/freq_ref)**c.beta_template,axis=np.ndim(freq)-1)/samples
 
 
-     if component.spectral_model=="thermaldust":
-        exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/component.temp_template)
-        exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/component.temp_template)
-        if output.bandpass == False: return convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(component.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
-        else: return np.sum( convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis] * (freq[...,np.newaxis]/freq_ref)**(component.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
+     if c.spectral_model=="thermaldust":
+        exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/c.temp_template)
+        exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/c.temp_template)
+        if o.bandpass == False: return convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(c.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+        else: return np.sum( convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis] * (freq[...,np.newaxis]/freq_ref)**(c.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
 
 
-     if  component.spectral_model=="cmb":
-         if output.bandpass == False: return convert_units(['u','K_CMB'],output.output_units,output.output_frequency)[np.newaxis,:,np.newaxis]
-         else: return np.sum(convert_units(['u','K_CMB'],output.output_units,output.output_frequency)[np.newaxis,:,np.newaxis], axis=np.ndim(freq)-1 ) / samples
+     if  c.spectral_model=="cmb":
+         if o.bandpass == False: return convert_units(['u','K_CMB'],o.output_units,o.output_frequency)[np.newaxis,:,np.newaxis]
+         else: return np.sum(convert_units(['u','K_CMB'],o.output_units,o.output_frequency)[np.newaxis,:,np.newaxis], axis=np.ndim(freq)-1 ) / samples
 
      else:
         print('No law selected')

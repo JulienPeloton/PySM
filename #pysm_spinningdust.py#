@@ -1,0 +1,6 @@
+import numpy as np
+import healpy as hp
+from scipy.interpolate import interp1d
+
+emiss_dat = np.load('Ancillaries/SpinningDust/emissivity.npy')
+
