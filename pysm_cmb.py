@@ -49,7 +49,7 @@ def main():
 		ipos = np.array(hp.pix2ang(out.nside, np.arange(12*(out.nside**2))))
 
 # Simulate a CMB and lensing field
-		cmb, aphi = simulate_tebp_correlated(cl_tebp_arr,out.nside,synlmax)
+		cmb, aphi = simulate_tebp_correlated(cl_tebp_arr,out.nside,synlmax,CMB.cmb_seed)
 		
 		if cmb.ndim == 1: cmb = np.reshape(cmb, [1,cmb.size])
 

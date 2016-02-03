@@ -82,7 +82,15 @@ class output(object):
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
 
 def convert_units(u_from, u_to, freq): #freq in GHz
-    return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
+
+    if u_from[0] not in units.keys():
+        if u_to[0] not in units.keys(): return units[u_from[0]+u_from[1]](np.asarray(freq))/units[u_to[0]+u_to[1]](np.asarray(freq))
+        else: return units[u_from[0]+u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
+
+    else: 
+        if u_to[0] not in units.keys(): return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/units[u_to[0]+u_to[1]](np.asarray(freq))
+        else: return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
+
 
 def scale_freqs(c, o, pol=None, samples=10.):
     
@@ -126,7 +134,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
 #Available at: https://github.com/amaurea/taylens
 
 # This generates correlated T,E,B and Phi maps                                             
-def simulate_tebp_correlated(cl_tebp_arr,nside,lmax):
+def simulate_tebp_correlated(cl_tebp_arr,nside,lmax,seed):
+        np.random.seed(seed)
         alms=hp.synalm(cl_tebp_arr,lmax=lmax,new=True)
         aphi=alms[-1]
         acmb=alms[0:-1]
