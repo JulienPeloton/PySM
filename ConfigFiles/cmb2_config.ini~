@@ -1,9 +1,0 @@
-[CMB]
-spectral_model = cmb
-
-cmb_seed = 1234
-#Tells the code to compute a new cmb realisation using taylens and the Cls stored in specs.
-compute_lensed_cmb = True
-#Location of Cls used to compute a CMB realisation.
-specs = ./Ancillaries/CMB/taylens/camb_lenspotentialCls.dat
-
