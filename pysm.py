@@ -21,7 +21,7 @@ units = {
     'G':1.e9,
     'K_RJ': lambda x: 3.072387e4*x**2,
     'K_CMB': lambda x:  (0.017608676*x/(np.exp(0.017608676*x)-1))**2*np.exp(0.017608676*x)*3.072387e4*x**2,
-    'Jysr': lambda x: 1.
+    'Jysr': lambda x: np.ones(x.size)
 }
 
 class component(object):
@@ -62,23 +62,16 @@ class component(object):
             self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
             if self.compute_lensed_cmb == False: self.lensed_cmb = hp.read_map(cdict['lensed_cmb'],field=(0,1,2),verbose=False)
         if 'emissivity' in keys:
-            self.emissivity = np.loadtxt(cdict['emissivity'],unpack=True)
+            self.emissivity = np.load(cdict['emissivity'])
         if 'freq_peak' in keys:
             try: self.freq_peak = float(cdict['freq_peak'])
             except ValueError: self.freq_peak = hp.read_map(cdict['freq_peak'],verbose=False)
         if 'peak_ref' in keys:
             self.peak_ref = float(cdict['peak_ref'])
             
-
-def spdust_scaling(c,o,pol=None):
-    freq = np.asarray(o.output_frequency)
-    f = interp1d(c.emissivity[0,:],c.emissivity[1,:],kind='cubic')
-    arg1 = freq[...,np.newaxis]*c.peak_ref/c.freq_peak
-    arg2 = c.freq_ref*c.peak_ref/c.freq_peak
-    return ((c.freq_ref/freq)**2)[...,np.newaxis]*(f(arg1)/f(arg2))
-
 class output(object):
     def __init__(self, config_dict):
+        self.output_prefix = config_dict['output_prefix']
         self.debug = 'True' in config_dict['debug']
         self.components = [i for i in config_dict['components'].split()]
         self.output_frequency = [float(i) for i in config_dict['output_frequency'].split()]
@@ -102,6 +95,7 @@ def scale_freqs(c, o, pol=None, samples=10.):
          widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in o.bandpass_widths])
          freq = freq[...,np.newaxis]+widths
 
+#Note that the frequencies within a bandwidth are stored in the second dimension of the frequency array.  When we sum over the final produce of each power law we therefore specify the ndim(freq)-1 dimension. Freq has two dimensions at this point and so ndim(freq)-1 = 1.  Axis indexing starts at 0. So this gives us the correct summation.
 
      if c.spectral_model=="curvepowerlaw": 
          if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log10(freq[...,np.newaxis]/c.freq_curve))

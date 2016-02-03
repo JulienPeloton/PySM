@@ -12,11 +12,13 @@ def main():
 
 	Config.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
 	dust = component(Config._sections['ThermalDust'])
+	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config.write(configfile)
 
-	print('Computing dust map using modified black body for a single component with parameters:')
+	print('Computing dust maps.')
 	print '----------------------------------------------------- \n'
-	print ''.join("%s: %s \n" % item   for item in vars(dust).items())
-        print '----------------------------------------------------- \n'
+	if out.debug == True: 
+		print ''.join("%s: %s \n" % item   for item in vars(dust).items())
+		print '----------------------------------------------------- \n'
 
 #In this case the scaling is done in uK_RJ, so the unit conversionn is different to synchrotron.
 	conv1 = convert_units(dust.template_units, ['M','Jysr'], dust.freq_ref)
@@ -30,7 +32,7 @@ def main():
 	if out.debug == True:
 		dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 		for i in range(0,len(out.output_frequency)):
-			hp.write_map(out.output_dir+'dust_%d.fits'%(out.output_frequency[i]),dus[:,i,:],coord='G',column_units=out.output_units)
+			hp.write_map(out.output_dir+out.output_prefix+'dust_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',dus[:,i,:],coord='G',column_units=out.output_units)
 
        	return np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 

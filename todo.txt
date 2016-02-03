@@ -1,3 +1,0 @@
-add seed for numpy random stuff. np.random.seed(seed). do this in taylens (simulate_tebp_correlated) and in noise realisation.
-
-

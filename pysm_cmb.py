@@ -11,11 +11,13 @@ def main():
 	out = output(Config._sections['GlobalParameters'])
 	Config.read('./ConfigFiles/'+Config.get('CMB','model')+'_config.ini')
 	CMB = component(Config._sections['CMB'])
+	with open(out.output_dir+out.output_prefix+'cmb_config.ini','w') as configfile: Config.write(configfile)
 
-	print 'Computing CMB map with parameters:'
+	print 'Computing CMB maps.'
 	print '----------------------------------------------------- \n'
-	print ''.join("%s: %s \n" % item   for item in vars(CMB).items())
-	print '----------------------------------------------------- \n'
+	if out.debug == True:
+		print ''.join("%s: %s \n" % item   for item in vars(CMB).items())
+		print '----------------------------------------------------- \n'
 #This code is edited from taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion - not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
 #Available at: https://github.com/amaurea/taylens
 	
@@ -78,7 +80,7 @@ def main():
 	if out.debug == True:
 		map_cmb = rm[:,np.newaxis,:]*scale_freqs(CMB,out)
 		for i in range(len(out.output_frequency)):
-			hp.write_map(out.output_dir+'lensed_cmb_%d.fits'%(out.output_frequency[i]),map_cmb[:,i,:],coord='G',column_units=out.output_units)
+			hp.write_map(out.output_dir+out.output_prefix+'lensed_cmb_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',map_cmb[:,i,:],coord='G',column_units=out.output_units)
 
 	return rm[:,np.newaxis,:]*scale_freqs(CMB,out)
 
