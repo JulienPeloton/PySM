@@ -63,11 +63,28 @@ in './ConfigFiles/<model>_config.ini'.
 
 The nominal models used for the components are: 
 
-    'dust1' = Thermal dust: Thermal dust is modelled as a single-component modified black body (mbb).  We use dust templates for emission at 545 GHz in intensity and 353 GHz in polarisation from the Planck-2015 analysis, and scale these to different frequencies with a mbb spectrum using the spatially varying temperature and spectral index obtained from the Planck data using the Commander code (Planck Collaboration 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for polarization as for intensity.  All input templates provided with the code have already been degraded to Nside=256 and smoothed to degree scale. 
+'dust1' = Thermal dust: Thermal dust is modelled as a single-component modified 
+ black body (mbb).  We use dust templates for emission at 545 GHz in intensity and 
+ 353 GHz in polarisation from the Planck-2015 analysis, and scale these to different 
+ frequencies with a mbb spectrum using the spatially varying temperature and spectral 
+ index obtained from the Planck data using the Commander code (Planck Collaboration 
+ 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for
+ polarization as for intensity.  All input templates provided with the code have 
+ already been degraded to Nside=256 and smoothed to degree scale. 
 
-     'synch1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with a spatially varying spectral index.  The emission template and spectral index map were derived using a combination of the Haslam 408 MHz data and WMAP 23 GHz data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling is used for intensity and polarization.  This is the same prescription as used in the Planck Sky Model's v1.7.8 'power law' option (Delabrouille et al. A&A 553, A96, 2013). A 'curved power law' model is also supported with a single isotropic curvature index.
+'synch1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with 
+a spatially varying spectral index.  The emission template and spectral index map were 
+derived using a combination of the Haslam 408 MHz data and WMAP 23 GHz data 
+(Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling is used for 
+intensity and polarization.  This is the same prescription as used in the Planck Sky 
+Model's v1.7.8 'power law' option (Delabrouille et al. A&A 553, A96, 2013). A 'curved 
+power law' model is also supported with a single isotropic curvature index.
 
-    'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute a lensed CMB realisation using nearest-neighbour Taylor interpolation (https://github.com/amaurea/taylens; Naess, S. K. and Louis, T. JCAP 09 001, 2013, astro-ph/1307.0719). This code takes, as an input, a set of unlensed Cl's generated using CAMB (http://www.camb.info/).
+'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute 
+a lensed CMB realisation using nearest-neighbour Taylor interpolation 
+(https://github.com/amaurea/taylens; Naess, S. K. and Louis, T. JCAP 09 001, 2013, 
+astro-ph/1307.0719). This code takes, as an input, a set of unlensed Cl's generated 
+using CAMB (http://www.camb.info/).
 
 ----------------------------------------------------------------------------
 
