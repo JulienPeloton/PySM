@@ -22,14 +22,22 @@ def main():
 		print '----------------------------------------------------- \n'
 
 #The unit conversion takes care of the scaling being done in MJysr. After scaling we convert to whatever the output units are.
-	conv1 = convert_units(synch.template_units, ['M','Jysr'], synch.freq_ref)
-	conv2 = convert_units(['M','Jysr'],out.output_units,out.output_frequency)
-	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
+	conv_I = convert_units(synch.template_units, ['u','K_RJ'], synch.freq_ref)
+	conv_pol = convert_units(synch.template_units, ['u','K_RJ'], synch.pol_freq_ref) 
+	conv2 = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
+	unit_conversion_I = conv_I*conv2.reshape((len(out.output_frequency),1))
+	unit_conversion_pol = conv_pol*conv2.reshape((len(out.output_frequency),1))
 #Do the scaling.
 
-	scaled_map_synch = scale_freqs(synch, out, pol=False)*synch.em_template*unit_conversion
-	scaled_map_synch_pol = scale_freqs(synch, out, pol=True)[np.newaxis,...]*np.array([synch.polq_em_template,synch.polu_em_template])[:,np.newaxis,:]*unit_conversion
+	scaled_map_synch = scale_freqs(synch, out, pol=False)*synch.em_template*unit_conversion_I
+	scaled_map_synch_pol = scale_freqs(synch, out, pol=True)[np.newaxis,...]*np.array([synch.polq_em_template,synch.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
 
+#This section forces P/I<0.75. This is done in the PSM's psm_synchrotorn.pro.
+
+	P = np.sqrt(scaled_map_synch_pol[0,:,:]**2+scaled_map_synch_pol[1,:,:]**2)/scaled_map_synch
+	F = 0.75*np.tanh(P/0.75)/P
+	scaled_map_synch_pol[0,:,:]=F*scaled_map_synch_pol[0,:,:]
+	scaled_map_synch_pol[1,:,:]=F*scaled_map_synch_pol[1,:,:]
 
 	if out.debug == True:
 		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])

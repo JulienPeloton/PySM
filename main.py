@@ -40,7 +40,7 @@ for i in sorted(out.components): comps = comps+i[0:4]+'_'
 fname = list()
 for i in range(len(out.output_frequency)): 
     
-    fname.append(comps+str(out.output_frequency[i])+'_'+str(out.nside)+'.fits')
+    fname.append(comps+str(out.output_frequency[i]).replace('.','p')+'_'+str(out.nside)+'.fits')
     hp.write_map(out.output_dir+out.output_prefix+fname[i],hp.ud_grade(sky[:,i,:],nside_out=out.nside),coord='G', column_units=out.output_units[0]+out.output_units[1])
 
     if out.debug == True:

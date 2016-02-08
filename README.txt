@@ -3,7 +3,7 @@ Most recent version available at: https://github.com/bthorne93/PySM
 
 -----------------------------------------------------------------------------------------
 
-This code generates full-sky simulations of galactic foregrounds in intensity and polarization up to 857GHz. The components simulated are: thermal dust, synchrotron, and CMB, with spinning dust and free-free to be added soon.  
+This code generates full-sky simulations of galactic foregrounds in intensity and polarization up to about 850GHz. The components simulated are: thermal dust, synchrotron, and CMB, with spinning dust and free-free to be added soon.  
 
 -----------------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ To change the parameters of the simulation edit the 'main_config.ini' file (or c
 
 The nominal models used for the components are: 
 
-    Thermal dust: Thermal dust is modelled as a single-component modified black body (mbb).  We use templates for emission at 545GHz in intensity and 353GHz in polarisation, and scale these to different frequencies with a mbb spectrum using the spatially varying temperature and spectral index obtained from the Planck data using the Commander code (Planck Collaboration, Adam, R., Ade, P. A. R., et al. 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for polarization as for intensity.  All input templates provided with the code have already been degraded to N_side 256 and smoothed to degree scale. 
+    Thermal dust: Thermal dust is modelled as a single-component modified black body (mbb).  We use templates for emission at 545GHz in intensity and 353GHz in polarisation, and scale these to different frequencies with a mbb spectrum using the spatially varying temperature and spectral index obtained from the Planck data using the Commander code (Planck Collaboration, Adam, R., Ade, P. A. R., et al. 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for polarization as for intensity.  All input templates provided with the code have already been degraded to N_side 256 and smoothed using a Gaussian kernel with full at width half maximum of one degree. 
 
     Synchrotron:  A power law scaling is used for the synchrotron emission, with a spatially varying spectral index.  The emission template and spectral index map were derived using a combination of the Haslam 408 MHz data and WMAP 23 GHz data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling is used for intensity and polarization.  This is the same prescription as used in the Planck Sky Model's 'power law' option (Delabrouille et al. A&A 553, A96, 2013). A 'curved power law' model is also supported with a single isotropic curvature index.
 
