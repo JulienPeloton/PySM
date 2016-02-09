@@ -32,12 +32,14 @@ def main():
 	scaled_map_synch = scale_freqs(synch, out, pol=False)*synch.em_template*unit_conversion_I
 	scaled_map_synch_pol = scale_freqs(synch, out, pol=True)[np.newaxis,...]*np.array([synch.polq_em_template,synch.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
 
-#This section forces P/I<0.75. This is done in the PSM's psm_synchrotorn.pro.
+#This section forces P/I<0.75. This is done using the same procedure as the PSM 1.7.8 psm_synchrotron.pro.
 
 	P = np.sqrt(scaled_map_synch_pol[0,:,:]**2+scaled_map_synch_pol[1,:,:]**2)/scaled_map_synch
 	F = 0.75*np.tanh(P/0.75)/P
 	scaled_map_synch_pol[0,:,:]=F*scaled_map_synch_pol[0,:,:]
 	scaled_map_synch_pol[1,:,:]=F*scaled_map_synch_pol[1,:,:]
+
+#-------
 
 	if out.debug == True:
 		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
