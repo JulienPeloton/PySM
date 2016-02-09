@@ -118,8 +118,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
      if c.spectral_model=="thermaldust":
         exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/c.temp_template)
         exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/c.temp_template)
-        if o.bandpass == False: return convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(c.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
-        else: return np.sum( convert_units(['M','Jysr'],['u','K_RJ'],freq_ref)[...,np.newaxis] * (freq[...,np.newaxis]/freq_ref)**(c.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
+        if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+        else: return np.sum((freq[...,np.newaxis]/freq_ref)**(c.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
 
 
      if  c.spectral_model=="cmb":

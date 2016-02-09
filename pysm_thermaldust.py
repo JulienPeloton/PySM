@@ -21,13 +21,15 @@ def main():
 		print '----------------------------------------------------- \n'
 
 #In this case the scaling is done in uK_RJ, so the unit conversionn is different to synchrotron.
-	conv1 = convert_units(dust.template_units, ['M','Jysr'], dust.freq_ref)
+	conv_I = convert_units(dust.template_units, ['u','K_RJ'], dust.freq_ref)
+	conv_pol =  convert_units(dust.template_units, ['u','K_RJ'], dust.pol_freq_ref)
 	conv2 = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
-	unit_conversion = conv1*conv2.reshape((len(out.output_frequency),1))
+	unit_conversion_I = conv_I*conv2.reshape((len(out.output_frequency),1))
+	unit_conversion_pol = conv_pol*conv2.reshape((len(out.output_frequency),1))
 
 #Do the scaling.
-	scaled_map_dust = scale_freqs(dust,out,pol=False)*dust.em_template*unit_conversion
-	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion
+	scaled_map_dust = scale_freqs(dust,out,pol=False)*dust.em_template*unit_conversion_I
+	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
 	
 	if out.debug == True:
 		dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
