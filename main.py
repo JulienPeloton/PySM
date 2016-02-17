@@ -34,10 +34,14 @@ if 'thermaldust' in out.components:
     sky = sky + pysm_thermaldust.main()
 if 'cmb' in out.components:
     sky = sky + pysm_cmb.main()
-
+print sky.shape
 comps =str()
 for i in sorted(out.components): comps = comps+i[0:4]+'_'
 fname = list()
+intensity = np.sqrt(np.var(sky,axis=2))
+
+np.savetxt(out.output_dir+out.output_prefix+comps+'_intensity.txt',intensity[0,:])
+
 for i in range(len(out.output_frequency)): 
     
     fname.append(comps+str(out.output_frequency[i]).replace('.','p')+'_'+str(out.nside)+'.fits')
