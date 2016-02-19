@@ -16,7 +16,6 @@ def main():
     spdust1 = component(Config._sections['SpinningDust1'])
     spdust2 = component(Config._sections['SpinningDust2'])
 
-    print '----------------------------------------------------- \n'
     print('Computing spinning dust map.')
     print '----------------------------------------------------- \n'
 
@@ -26,13 +25,13 @@ def main():
         print '----------------------------------------------------- \n'
 
 #Compute a map of the polarisation angle from the commander dust map polariationn angle. 
-
     pol_Q_sgn = np.greater(spdust_general.thermaldust_polq,0)
     pol_U_sgn = np.greater(spdust_general.thermaldust_polu,0)
 
     twochi = np.arctan(spdust_general.thermaldust_polu/spdust_general.thermaldust_polq)
     pol_angle = np.zeros(len(twochi))
 
+#Due to the degeneracy in Q,U there are two solutions for the arctan. Have to choose the pair of Q and U that preserves their signs if you were to reverse the arctan.
     for c in range(len(twochi)):
         if pol_Q_sgn[c] == True:
             if pol_U_sgn[c] == True: pol_angle[c] = twochi[c]
@@ -40,14 +39,6 @@ def main():
         else: 
             if pol_U_sgn[c] == True: pol_angle[c] = twochi[c]+np.pi
             else: pol_angle[c] = twochi[c]-np.pi
-        
-
-#    intensq = spdust_general.thermaldust_polq/np.cos(pol_angle)
-#    intensu = spdust_general.thermaldust_polu/np.sin(pol_angle)
-
-#    hp.mollview(intensq/intensu)
-#    hp.mollview(intensu)
-#    plt.show()
 
 #Units to do the scaling in MJysr and then bring the result back to the output units.
     conv1 = convert_units(spdust1.template_units, ['M','Jysr'], spdust1.freq_ref)
@@ -58,13 +49,6 @@ def main():
 
     scaled_map_spdust = scale_freqs(spdust1,out,pol=False)*spdust1.em_template*unit_conversion1 + scale_freqs(spdust2,out,pol=False)
     scaled_map_spdust_pol = scaled_map_spdust[np.newaxis,...]*np.asarray([np.cos(pol_angle),np.sin(pol_angle)])[:,np.newaxis,:]*spdust_general.pol_frac
-
-#    hp.mollview(pol_angle)
-#    hp.mollview(np.cos(pol_angle))
-#    hp.mollview(scaled_map_spdust[0,:])
-#    hp.mollview(scaled_map_spdust_pol[0,0,:],min=-150,max=150)
-#    hp.mollview(scaled_map_spdust_pol[1,0,:],min=-150,max=150)
-#    plt.show()
 
     if out.debug == True:
         for i in range(0,len(out.output_frequency)):

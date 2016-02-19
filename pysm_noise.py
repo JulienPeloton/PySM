@@ -9,7 +9,6 @@ def instrument_noise():
     Config.read('main_config.ini')
     out = output(Config._sections['GlobalParameters'])
     
-    print '----------------------------------------------------- \n'
     print('Adding instrument noise.')
     print '----------------------------------------------------- \n'
  

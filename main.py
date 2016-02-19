@@ -26,17 +26,16 @@ if not os.path.exists(out.output_dir): os.makedirs(out.output_dir)
 with open(out.output_dir+out.output_prefix+'main_config.ini','w') as configfile: Config.write(configfile)
 
 sky = np.zeros(hp.nside2npix(out.nside))
-
-#Create synchrotron, dust, and cmb maps at output frequencies.
+print '----------------------------------------------------- \n'
+#Create synchrotron, dust, AME,  and cmb maps at output frequencies then add noise.
 if 'synchrotron' in out.components:
     sky = pysm_synchrotron.main()
-    print pysm_synchrotron.main().shape
 if 'thermaldust' in out.components:
     sky = sky + pysm_thermaldust.main()
-if 'cmb' in out.components:
-    sky = sky + pysm_cmb.main()
 if 'spinningdust' in out.components:
     sky = sky + pysm_spinningdust.main()
+if 'cmb' in out.components:
+    sky = sky + pysm_cmb.main()
 if out.instrument_noise == True:
     sky = sky + pysm_noise.instrument_noise()
 
