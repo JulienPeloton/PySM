@@ -68,6 +68,12 @@ class component(object):
             except ValueError: self.freq_peak = hp.read_map(cdict['freq_peak'],verbose=False)
         if 'peak_ref' in keys:
             self.peak_ref = float(cdict['peak_ref'])
+        if 'thermaldust_polq' in keys:
+            self.thermaldust_polq = hp.read_map(cdict['thermaldust_polq'],verbose=False)
+        if 'thermaldust_polu' in keys:
+            self.thermaldust_polu = hp.read_map(cdict['thermaldust_polu'],verbose=False)
+        if 'pol_frac' in keys:
+            self.pol_frac = float(cdict['pol_frac'])
             
 class output(object):
     def __init__(self, config_dict):
@@ -80,6 +86,9 @@ class output(object):
         self.output_dir = config_dict['output_dir']
         self.bandpass = 'True' in config_dict['bandpass']
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
+        self.instrument_noise = 'True' in config_dict['instrument_noise']
+        self.instrument_noise_i = float(config_dict['instrument_noise_i'])
+        self.instrument_noise_pol = float(config_dict['instrument_noise_pol'])
 
 def convert_units(u_from, u_to, freq): #freq in GHz
 
@@ -125,6 +134,18 @@ def scale_freqs(c, o, pol=None, samples=10.):
      if  c.spectral_model=="cmb":
          if o.bandpass == False: return convert_units(['u','K_CMB'],o.output_units,o.output_frequency)[np.newaxis,:,np.newaxis]
          else: return np.sum(convert_units(['u','K_CMB'],o.output_units,o.output_frequency)[np.newaxis,:,np.newaxis], axis=np.ndim(freq)-1 ) / samples
+
+     if c.spectral_model=="spdustnum":
+         arg1 = freq[...,np.newaxis]*c.peak_ref/c.freq_peak
+         arg1[arg1>np.max(c.emissivity[0,:])] = 0  #disregard elements where emissivity is zero.
+         arg1[arg1<np.min(c.emissivity[0,:])] = 0
+         arg2 = c.freq_ref*c.peak_ref/c.freq_peak
+         f = interp1d(c.emissivity[0,:],c.emissivity[1,:],kind='cubic')
+         ind = np.where(arg1>0)
+         arg1[ind] = f(arg1[ind])
+
+         if o.bandpass == False: return ((c.freq_ref/freq)**2)[...,np.newaxis]*(arg1/f(arg2))
+         else: return np.sum(((c.freq_ref/freq)**2)[...,np.newaxis] * (arg1/f(arg2)), axis=np.ndim(freq)-1 ) / samples
 
      else:
         print('No law selected')

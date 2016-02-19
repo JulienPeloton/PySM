@@ -1,5 +1,5 @@
 import ConfigParser, os
-import pysm_synchrotron,pysm_thermaldust,pysm_cmb
+import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise
 from pysm import output
 import healpy as hp
 import numpy as np
@@ -30,18 +30,20 @@ sky = np.zeros(hp.nside2npix(out.nside))
 #Create synchrotron, dust, and cmb maps at output frequencies.
 if 'synchrotron' in out.components:
     sky = pysm_synchrotron.main()
+    print pysm_synchrotron.main().shape
 if 'thermaldust' in out.components:
     sky = sky + pysm_thermaldust.main()
 if 'cmb' in out.components:
     sky = sky + pysm_cmb.main()
-print sky.shape
+if 'spinningdust' in out.components:
+    sky = sky + pysm_spinningdust.main()
+if out.instrument_noise == True:
+    sky = sky + pysm_noise.instrument_noise()
+
+
 comps =str()
 for i in sorted(out.components): comps = comps+i[0:4]+'_'
 fname = list()
-intensity = np.sqrt(np.var(sky,axis=2))
-
-np.savetxt(out.output_dir+out.output_prefix+comps+'_intensity.txt',intensity[0,:])
-
 for i in range(len(out.output_frequency)): 
     
     fname.append(comps+str(out.output_frequency[i]).replace('.','p')+'_'+str(out.nside)+'.fits')

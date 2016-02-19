@@ -14,7 +14,6 @@ def main():
 	synch = component(Config._sections['Synchrotron'])
 	with open(out.output_dir+out.output_prefix+'synchrotron_config.ini','w') as configfile: Config.write(configfile)
 
-	print '----------------------------------------------------- \n'
 	print('Computing synchrotron maps.')
 	print '----------------------------------------------------- \n'
 	if out.debug == True:
