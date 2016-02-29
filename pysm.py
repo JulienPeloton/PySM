@@ -87,8 +87,8 @@ class output(object):
         self.bandpass = 'True' in config_dict['bandpass']
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
         self.instrument_noise = 'True' in config_dict['instrument_noise']
-        self.instrument_noise_i = float(config_dict['instrument_noise_i'])
-        self.instrument_noise_pol = float(config_dict['instrument_noise_pol'])
+        self.instrument_noise_i = np.asarray([float(i) for i in config_dict['instrument_noise_i'].split()])
+        self.instrument_noise_pol = np.asarray([float(i) for i in config_dict['instrument_noise_pol'].split()])
 
 def convert_units(u_from, u_to, freq): #freq in GHz
 

@@ -33,7 +33,7 @@ output_prefix = test_
 #Instrument noise is included if instrument_noise = True.  The noise is simply generated as a Gaussian, given the noise level in units of uK_RJ/amin for both intensity and polarization.
 instrument_noise = True
 instrument_noise_i = 5. 10. 20. 50.
-instrument_noise_pol = 5. 10. 20. 50.
+instrument_noise_pol = 5. 10. 40. 100.
 
 #Each component is described in its own config file. Files are in /ConfigFiles/<model>_config.ini. The code will look there.
 

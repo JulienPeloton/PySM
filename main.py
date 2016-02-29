@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='Code to simulate galactic foregrou
 parser.add_argument('config_file', help='Main configuration file.')
 
 
-##Get the output directory in order to save the configuration f ile.
+##Get the output directory in order to save the configuration file.
 Config = ConfigParser.ConfigParser()
 Config.read(parser.parse_args().config_file)
 out = output(Config._sections['GlobalParameters'])
@@ -30,18 +30,23 @@ print '----------------------------------------------------- \n'
 #Create synchrotron, dust, AME,  and cmb maps at output frequencies then add noise.
 if 'synchrotron' in out.components:
     sky = pysm_synchrotron.main()
+
 if 'thermaldust' in out.components:
     sky = sky + pysm_thermaldust.main()
+
 if 'spinningdust' in out.components:
     sky = sky + pysm_spinningdust.main()
+
 if 'cmb' in out.components:
     sky = sky + pysm_cmb.main()
+
 if out.instrument_noise == True:
     sky = sky + pysm_noise.instrument_noise()
 
 
 comps =str()
 for i in sorted(out.components): comps = comps+i[0:4]+'_'
+if out.instrument_noise == True: comps = comps + 'noisy_'
 fname = list()
 for i in range(len(out.output_frequency)): 
     

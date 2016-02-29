@@ -10,7 +10,9 @@ This code generates full-sky simulations of Galactic foregrounds in intensity an
 polarization relevant for CMB experiments. The components simulated are: thermal dust, 
 synchrotron, AME, and CMB. Free-free will be added soon.
 
-Current version v-0.1 generates degree-scale smoothed maps, at Healpix Nside=256. There exist options to integrate over a top hat bandpass, and to add instrument noise in intensity and polarization.
+Current version v-0.1 generates degree-scale smoothed maps, at Healpix Nside=256. There
+exist options to integrate over a top hat bandpass, and to add instrument noise in 
+intensity and polarization.
 Smaller-scales and different Nside available soon.
 
 There will be scope for a few options for the model for each component, attempting to 
@@ -83,7 +85,13 @@ as used in the Planck Sky Model's v1.7.8 'power law' option (Delabrouille et al.
 A96, 2013), but with the Haslam map updated to the Remazeilles version. A 'curved power 
 law' model is also supported with a single isotropic curvature index.
 
-'spdust1' = Spinning Dust: We model the AME as a sum of two spinning dust populations based on the Commander code (Planck Collaboration 2015, arXiv:1502.01588). A component is defined by an emission template at a reference frequency and a peak frequency of the emission law. Both populations have a spatially varying emission template, one population has a spatially varying peak frequency, and the other population has a spatially constant peak frequency.  The emission law is generated using the SpDust2 code (Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904)  
+'spdust1' = Spinning Dust: We model the AME as a sum of two spinning dust populations 
+based on the Commander code (Planck Collaboration 2015, arXiv:1502.01588). A component 
+is defined by an emission template at a reference frequency and a peak frequency of the 
+emission law. Both populations have a spatially varying emission template, one 
+population has a spatially varying peak frequency, and the other population has a 
+spatially constant peak frequency.  The emission law is generated using the SpDust2 code 
+(Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904)  
 
 'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute 
 a lensed CMB realisation using nearest-neighbour Taylor interpolation 
