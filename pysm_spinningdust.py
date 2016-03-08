@@ -11,7 +11,7 @@ def main():
     Config.read('main_config.ini')
     out = output(Config._sections['GlobalParameters'])
 
-    Config.read('./ConfigFiles/spdust1_config.ini')
+    Config.read('./ConfigFiles/'+Config.get('SpinningDust','model')+'_config.ini')
     spdust_general = component(Config._sections['General'])
     spdust1 = component(Config._sections['SpinningDust1'])
     spdust2 = component(Config._sections['SpinningDust2'])

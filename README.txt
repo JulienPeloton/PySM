@@ -1,4 +1,4 @@
-PySM v-0.1 
+PySM v-0.2 
 Beta version.
 Most recent version available at: https://github.com/bthorne93/PySM
 
@@ -10,13 +10,13 @@ This code generates full-sky simulations of Galactic foregrounds in intensity an
 polarization relevant for CMB experiments. The components simulated are: thermal dust, 
 synchrotron, AME, and CMB. Free-free will be added soon.
 
-Current version v-0.1 generates degree-scale smoothed maps, at Healpix Nside=256. There
-exist options to integrate over a top hat bandpass, and to add instrument noise in 
+Current version v-0.2 generates degree-scale smoothed maps, at Healpix Nside=256. There
+exist options to integrate over a top hat bandpass, and to add white instrument noise in 
 intensity and polarization.
 Smaller-scales and different Nside available soon.
 
-There will be scope for a few options for the model for each component, attempting to 
-be consistent with current data. The current v-0.1 version has a single nominal option 
+There is scope for a few options for the model for each component, attempting to 
+be consistent with current data. The current v-0.2 version has typically two options 
 for each component. 
 
 This code is based on the large-scale Galactic part of Planck Sky Model code and uses 
@@ -73,7 +73,7 @@ The nominal models used for the components are:
  polarization as for intensity.  All input templates provided with the code have 
  already been degraded to Nside=256 and smoothed to degree scale. 
 
-'synch1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with 
+'synchrotron1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with 
 a spatially varying spectral index.  The emission templates are smoothed to degree scale
 and are the Haslam 408 MHz data reprocessed by Remazeilles et al 2015 MNRAS 451, 4311, 
 and the WMAP 7-year 23 GHz Q/U maps (Jarosik et al 2011 ApJS, 192, 14J), smoothed to 3 
@@ -91,7 +91,7 @@ is defined by an emission template at a reference frequency and a peak frequency
 emission law. Both populations have a spatially varying emission template, one 
 population has a spatially varying peak frequency, and the other population has a 
 spatially constant peak frequency.  The emission law is generated using the SpDust2 code 
-(Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904)  
+(Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904). The nominal model is unpolarized.  
 
 'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute 
 a lensed CMB realisation using nearest-neighbour Taylor interpolation 
@@ -100,6 +100,23 @@ astro-ph/1307.0719). This code takes, as an input, a set of unlensed Cl's genera
 using CAMB (http://www.camb.info/). The params.ini is in the Ancillary directory.
 
 ----------------------------------------------------------------------------
+
+Variations on the components (so far) are:
+
+'dust2' = emissivity that varies spatially on degree scales, drawn from a Gaussian 
+with beta=1.59 \pm 0.2. A Gaussian variation is not physically motivated, but 
+amount of variation consistent with Planck.
+
+'synchrotron2' = synchrotron index steepens off the Galactic plane, from -3.0 in the 
+plane to -3.3 off the plane. Consistent with WMAP.
+
+'spdust2' = AME has 2% polarization fraction. Polarized maps simulated with thermal 
+dust angles and nominal AME intensity scaled globally by polarization fraction. 
+Within WMAP/Planck bounds.
+
+----------------------------------------------------------------------------
+ 
+
 
 
 		
