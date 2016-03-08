@@ -1,14 +1,14 @@
 [GlobalParameters]
 #Current options are: synchrotron, thermaldust, spinningdust, and cmb. Do not use commas or quotes.
 #These components should each be assigned a model choice below 
-components = thermaldust synchrotron cmb spinningdust
+components = thermaldust cmb synchrotron spinningdust
 
 #Output frequency in GHz. Must match number of bandpass widths. No commas or quotes.
 output_frequency =  20. 34. 40. 50.
 
 
-#Integrate over tophat bandpass of width bandpass_widths centered at output_frequency, True or False.
-bandpass = True
+#Integrate over tophat bandpass of width bandpass_widths centered at
+output_frequency, True or False.  bandpass = Tru
 
 #Widths of the bandpasses in GHz. Only used if bandpass = True. Must have the same number of bandpass widths as output frequencies.
 bandpass_widths = 5. 5. 5. 5. 
@@ -28,9 +28,9 @@ debug = False
 #Directory in which all outputs will be written. NOTE: the trailing '/' is required.
 output_dir = ./Output/
 #Optional prefix for the output files.
-output_prefix = nu_
+output_prefix = test_
 
-#Instrument noise is included if instrument_noise = True.  The noise is simply generated as a Gaussian, given the noise level in units of uK_CMB/amin for both intensity and polarization.
+#Instrument noise is included if instrument_noise = True.  The noise is simply generated as a Gaussian, given the noise level in units of uK_RJ/amin for both intensity and polarization.
 instrument_noise = True
 instrument_noise_i = 5. 10. 20. 50.
 instrument_noise_pol = 5. 10. 20. 50.
