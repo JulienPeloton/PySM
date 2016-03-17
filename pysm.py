@@ -83,7 +83,10 @@ class component(object):
 class output(object):
     def __init__(self, config_dict):
         self.output_prefix = config_dict['output_prefix']
-        self.debug = 'True' in config_dict['debug']
+        if 'debug' in config_dict :
+            self.debug = 'True' in config_dict['debug']
+        else :
+            self.debug = False
         self.components = [i for i in config_dict['components'].split()]
         self.output_frequency = [float(i) for i in config_dict['output_frequency'].split()]
         self.output_units = [config_dict['output_units'][0],config_dict['output_units'][1:]]
