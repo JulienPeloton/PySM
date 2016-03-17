@@ -3,15 +3,15 @@ import healpy as hp
 import ConfigParser
 from pysm import scale_freqs, convert_units, output, component
 
-def main():
+def main(fname_config):
 	
 #Read configuration into classes
 	Config = ConfigParser.ConfigParser()
-	Config.read('main_config.ini')
+	Config.read(fname_config)
 	out = output(Config._sections['GlobalParameters'])
 
 	Config.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
-	dust = component(Config._sections['ThermalDust'])
+	dust = component(Config._sections['ThermalDust'],out.nside)
 	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config.write(configfile)
 
 	print('Computing dust maps.')

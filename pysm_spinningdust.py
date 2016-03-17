@@ -4,17 +4,17 @@ import numpy as np
 from pysm import scale_freqs, output, component, convert_units
 import matplotlib.pyplot as plt
 
-def main():
+def main(fname_config):
 
 #Read in configuration file to classes.
     Config = ConfigParser.ConfigParser()
-    Config.read('main_config.ini')
+    Config.read(fname_config)
     out = output(Config._sections['GlobalParameters'])
 
     Config.read('./ConfigFiles/'+Config.get('SpinningDust','model')+'_config.ini')
-    spdust_general = component(Config._sections['General'])
-    spdust1 = component(Config._sections['SpinningDust1'])
-    spdust2 = component(Config._sections['SpinningDust2'])
+    spdust_general = component(Config._sections['General'],out.nside)
+    spdust1 = component(Config._sections['SpinningDust1'],out.nside)
+    spdust2 = component(Config._sections['SpinningDust2'],out.nside)
 
     print('Computing spinning dust map.')
     print '----------------------------------------------------- \n'

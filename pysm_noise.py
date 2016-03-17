@@ -3,10 +3,10 @@ import numpy as np
 import ConfigParser
 from pysm import output,convert_units
 
-def instrument_noise():
+def instrument_noise(fname_config):
 
     Config = ConfigParser.ConfigParser()
-    Config.read('main_config.ini')
+    Config.read(fname_config)
     out = output(Config._sections['GlobalParameters'])
 
     print('Adding instrument noise.')

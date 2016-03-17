@@ -3,14 +3,14 @@ import healpy as hp
 from pysm import *
 import ConfigParser
 
-def main():
+def main(fname_config):
 
 #Read config file.
 	Config = ConfigParser.ConfigParser()
-	Config.read('main_config.ini')
+	Config.read(fname_config)
 	out = output(Config._sections['GlobalParameters'])
 	Config.read('./ConfigFiles/'+Config.get('CMB','model')+'_config.ini')
-	CMB = component(Config._sections['CMB'])
+	CMB = component(Config._sections['CMB'],out.nside)
 	with open(out.output_dir+out.output_prefix+'cmb_config.ini','w') as configfile: Config.write(configfile)
 
 	print 'Computing CMB maps.'

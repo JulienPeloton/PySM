@@ -29,19 +29,19 @@ sky = np.zeros(hp.nside2npix(out.nside))
 print '----------------------------------------------------- \n'
 #Create synchrotron, dust, AME,  and cmb maps at output frequencies then add noise.
 if 'synchrotron' in out.components:
-    sky = pysm_synchrotron.main()
+    sky = pysm_synchrotron.main(parser.parse_args().config_file)
 
 if 'thermaldust' in out.components:
-    sky = sky + pysm_thermaldust.main()
+    sky = sky + pysm_thermaldust.main(parser.parse_args().config_file)
 
 if 'spinningdust' in out.components:
-    sky = sky + pysm_spinningdust.main()
+    sky = sky + pysm_spinningdust.main(parser.parse_args().config_file)
 
 if 'cmb' in out.components:
-    sky = sky + pysm_cmb.main()
+    sky = sky + pysm_cmb.main(parser.parse_args().config_file)
 
 if out.instrument_noise == True:
-    sky = sky + pysm_noise.instrument_noise()
+    sky = sky + pysm_noise.instrument_noise(parser.parse_args().config_file)
 
 
 comps =str()

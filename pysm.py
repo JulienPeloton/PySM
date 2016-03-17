@@ -24,28 +24,32 @@ units = {
     'Jysr': lambda x: np.ones(x.size)
 }
 
+def read_map_wrapped(fname,nside_out,field=0) :
+#    return hp.ud_grade(np.array(hp.read_map(fname,field=field,verbose=False)),nside_out=nside_out)
+    return hp.read_map(fname,field=field,verbose=False)
+
 class component(object):
 
-    def __init__(self,cdict):
+    def __init__(self,cdict,nside_out):
         keys = cdict.keys()
         if 'pol' in keys:
             self.pol = cdict['pol']
         if 'spectral_model' in keys:
             self.spectral_model = cdict['spectral_model']
         if 'em_template' in keys:
-            self.em_template = hp.read_map(cdict['em_template'],verbose=False)
+            self.em_template = read_map_wrapped(cdict['em_template'],nside_out)
         if 'beta_template' in keys:
-            self.beta_template = hp.read_map(cdict['beta_template'],verbose=False)
+            self.beta_template = read_map_wrapped(cdict['beta_template'],nside_out)
         if 'temp_template' in keys:
-            self.temp_template = hp.read_map(cdict['temp_template'],verbose=False)
+            self.temp_template = read_map_wrapped(cdict['temp_template'],nside_out)
         if 'freq_curve' in keys:
             self.freq_curve = float(cdict['freq_curve'])
         if 'beta_curve' in keys:
             self.beta_curve = float(cdict['beta_curve'])
         if 'polq_em_template' in keys: 
-            self.polq_em_template = hp.read_map(cdict['polq_em_template'],verbose=False)
+            self.polq_em_template = read_map_wrapped(cdict['polq_em_template'],nside_out)
         if 'polu_em_template' in keys:
-            self.polu_em_template = hp.read_map(cdict['polu_em_template'],verbose=False)
+            self.polu_em_template = read_map_wrapped(cdict['polu_em_template'],nside_out)
         if 'freq_ref' in keys:
             self.freq_ref = float(cdict['freq_ref'])
         if 'pol_freq_ref' in keys:
@@ -60,18 +64,18 @@ class component(object):
             self.cmb_seed = int(cdict['cmb_seed'])
         if 'compute_lensed_cmb' in keys:
             self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
-            if self.compute_lensed_cmb == False: self.lensed_cmb = hp.read_map(cdict['lensed_cmb'],field=(0,1,2),verbose=False)
+            if self.compute_lensed_cmb == False: self.lensed_cmb = read_map_wrapped(cdict['lensed_cmb'],nside_out,field=(0,1,2))
         if 'emissivity' in keys:
             self.emissivity = np.load(cdict['emissivity'])
         if 'freq_peak' in keys:
             try: self.freq_peak = float(cdict['freq_peak'])
-            except ValueError: self.freq_peak = hp.read_map(cdict['freq_peak'],verbose=False)
+            except ValueError: self.freq_peak = read_map_wrapped(cdict['freq_peak'],nside_out)
         if 'peak_ref' in keys:
             self.peak_ref = float(cdict['peak_ref'])
         if 'thermaldust_polq' in keys:
-            self.thermaldust_polq = hp.read_map(cdict['thermaldust_polq'],verbose=False)
+            self.thermaldust_polq = read_map_wrapped(cdict['thermaldust_polq'],nside_out)
         if 'thermaldust_polu' in keys:
-            self.thermaldust_polu = hp.read_map(cdict['thermaldust_polu'],verbose=False)
+            self.thermaldust_polu = read_map_wrapped(cdict['thermaldust_polu'],nside_out)
         if 'pol_frac' in keys:
             self.pol_frac = float(cdict['pol_frac'])
             

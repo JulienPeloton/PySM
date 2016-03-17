@@ -3,15 +3,15 @@ import healpy as hp
 from pysm import scale_freqs, convert_units, component, output
 import ConfigParser
 
-def main():
+def main(fname_config):
 
 #Read in configuration file to classes.
 	Config = ConfigParser.ConfigParser()
-	Config.read('main_config.ini')
+	Config.read(fname_config)
 	out = output(Config._sections['GlobalParameters'])
 
 	Config.read('./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini')
-	synch = component(Config._sections['Synchrotron'])
+	synch = component(Config._sections['Synchrotron'],out.nside)
 	with open(out.output_dir+out.output_prefix+'synchrotron_config.ini','w') as configfile: Config.write(configfile)
 
 	print('Computing synchrotron maps.')
