@@ -25,8 +25,9 @@ units = {
 }
 
 def read_map_wrapped(fname,nside_out,field=0) :
-#    return hp.ud_grade(np.array(hp.read_map(fname,field=field,verbose=False)),nside_out=nside_out)
-    return hp.read_map(fname,field=field,verbose=False)
+    return hp.ud_grade(np.array(hp.read_map(fname,field=field,verbose=False)),nside_out=nside_out)
+# Switch to this if you don't want to ud_grade on input
+#    return hp.read_map(fname,field=field,verbose=False)
 
 class component(object):
 
