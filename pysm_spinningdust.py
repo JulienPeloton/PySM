@@ -25,33 +25,21 @@ def main(fname_config):
         print '----------------------------------------------------- \n'
 
 #Compute a map of the polarisation angle from the commander dust map polariationn angle. 
-    pol_Q_sgn = np.greater(spdust_general.thermaldust_polq,0)
-    pol_U_sgn = np.greater(spdust_general.thermaldust_polu,0)
-
-    twochi = np.arctan(spdust_general.thermaldust_polu/spdust_general.thermaldust_polq)
-    pol_angle = np.zeros(len(twochi))
-
-#Due to the degeneracy in Q,U there are two solutions for the arctan. Have to choose the pair of Q and U that preserves their signs if you were to reverse the arctan.
-    for c in range(len(twochi)):
-        if pol_Q_sgn[c] == True:
-            if pol_U_sgn[c] == True: pol_angle[c] = twochi[c]
-            else: pol_angle[c] = twochi[c]
-        else: 
-            if pol_U_sgn[c] == True: pol_angle[c] = twochi[c]+np.pi
-            else: pol_angle[c] = twochi[c]-np.pi
+    
+    pol_angle = np.arctan2(spdust_general.thermaldust_polu,spdust_general.thermaldust_polq)
 
 #Units to do the scaling in MJysr and then bring the result back to the output units.
-    conv1 = convert_units(spdust1.template_units, ['M','Jysr'], spdust1.freq_ref)
-    conv2 = convert_units(spdust2.template_units, ['M','Jysr'], spdust2.freq_ref)
-    conv_end = convert_units(['M','Jysr'],out.output_units,out.output_frequency)
+    conv1 = convert_units(spdust1.template_units, ['u','K_RJ'], spdust1.freq_ref)
+    conv2 = convert_units(spdust2.template_units, ['u','K_RJ'], spdust2.freq_ref)
+    conv_end = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
     unit_conversion1 = conv1*conv_end.reshape((len(out.output_frequency),1))
     unit_conversion2 = conv2*conv_end.reshape((len(out.output_frequency),1))
 
-    scaled_map_spdust = scale_freqs(spdust1,out,pol=False)*spdust1.em_template*unit_conversion1 + scale_freqs(spdust2,out,pol=False)
+    scaled_map_spdust = scale_freqs(spdust1,out,pol=False)*spdust1.em_template*unit_conversion1 + scale_freqs(spdust2,out,pol=False)*spdust2.em_template*unit_conversion2
     scaled_map_spdust_pol = scaled_map_spdust[np.newaxis,...]*np.asarray([np.cos(pol_angle),np.sin(pol_angle)])[:,np.newaxis,:]*spdust_general.pol_frac
 
     if out.debug == True:
         for i in range(0,len(out.output_frequency)):
-            hp.write_map(out.output_dir/+'spdust_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
+            hp.write_map(out.output_dir+'spdust_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
 
     return np.concatenate([scaled_map_spdust[np.newaxis,...],scaled_map_spdust_pol])
