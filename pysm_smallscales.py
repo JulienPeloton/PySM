@@ -74,9 +74,18 @@ def lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
     return m_0*d_ss
 
 def generate_ss_map(map_in,nside_o,l_fit,pl_fit,theta,method):
-    if method=='mod_gaussian': return mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
-    if method=='lognormal': return lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
-
+    if method=='mod_gaussian': 
+        if not True in list(map_in<0): 
+            print('mod_gaussian is intended for use on polarization maps only.')
+            exit()
+        return mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
+    
+    if method=='lognormal': 
+        if True in list(map_in<0):
+            print('lognormal method intended for use on intensity maps only.')
+            exit()
+        return lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
+    
 
 
 """ 
@@ -106,8 +115,8 @@ theta_res = 1.
 l_fit = [20.,50.]
 pl_fit = [200.,600.]
 
-file_in = './Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
-file_out = './Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
+file_in = './Ancillaries/Synchrotron/mamd2008/wmap7yr_polq_23GHz_3deg_256_v3_PSM_ss.fits'
+file_out = './Ancillaries/Synchrotron/mamd2008/wmap7yr_polq_23GHz_3deg_256_v3_PSM_ss.fits'
 
 
 """
