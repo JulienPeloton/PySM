@@ -44,11 +44,19 @@ def generate_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
 """ 
 OPTIONS:
 
-Details of the map to be extended to small scales.  The map will be read in and degraded to the specified nside before being used.  Therefore if the template is nside 1024 this must be specified as:
+Details of the map to be extended to small scales.  The map will be
+ read in and degraded to the specified nside_in before being used.  Therefore 
+if the template is nside 1024 this must be specified as:
  
->nside = 1024
+>nside_in = 1024
 
-The other specified information is the multipole range over which the power law is fitted, l_fit, and the angular scale of the limiting resolution of the input map, theta_res, in degrees.
+The output is generated at nside_out.
+
+The other specified information is:
+
+l_fit:  the multipole range over which the power law is fitted.
+theta_res:  the angular scale (in deg) of the limiting resolution of the input.
+pl_fit: range of multipoles over which the chi_sq fits.
 
 """
 
