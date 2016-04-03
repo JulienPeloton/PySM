@@ -30,7 +30,8 @@ def main(fname_config):
 #Do the scaling.
 	scaled_map_dust = scale_freqs(dust,out,pol=False)*dust.em_template*unit_conversion_I
 	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
-	
+	print scaled_map_dust.shape
+	print scaled_map_dust_pol.shape
 	if out.debug == True:
 		dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 		for i in range(0,len(out.output_frequency)):
