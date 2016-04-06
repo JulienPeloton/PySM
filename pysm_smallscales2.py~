@@ -1,0 +1,191 @@
+import healpy as hp
+import numpy as np
+from scipy.optimize import minimize
+import scipy.constants as const
+from pysm import read_map_wrapped
+import matplotlib.pyplot as plt
+
+def safe_log10(x,minval=0.0000000001):
+    return np.log10(x.clip(min=minval))
+
+def b_l(ell,sigma):
+    return np.exp(-0.5*ell*(ell+1)*sigma**2)
+
+def sigma(fwhm):
+    return fwhm*(2.*np.pi/(60.*360.))/(np.sqrt(8.*np.log(2.)))
+
+def fit_cl_conv(map,l_fit,theta):
+    cl = hp.anafast(map)
+
+    ell = np.arange(cl.size)
+
+    coeffs = np.polyfit(safe_log10(ell[l_fit[0]:l_fit[1]]),safe_log10(cl[l_fit[0]:l_fit[1]]),1)
+
+    cl_pl = np.power(10,coeffs[1])*np.power(ell,coeffs[0])
+
+    print('Coefficients of power law fit:', coeffs)
+#    plt.figure()
+#    plt.xscale('log');plt.yscale('log')
+#    plt.plot(ell,cl_pl)
+#    plt.plot(ell,(1-b_l(ell,sigma(theta*60.)))**2)
+#    plt.plot(cl_pl*(1-b_l(ell,sigma(theta*60.)))**2)
+    return cl_pl*(1-b_l(ell,sigma(theta*60.)))**2
+
+def local_mean(m,pix,radius): #radius is in radians
+    nside= hp.get_nside(m)
+    pos = hp.pix2vec(nside,pix)
+    inds = hp.query_disc(nside,pos,radius)
+    disc_mean = np.mean(m[inds])
+    return disc_mean
+
+def mod_gaussian_model(gamma,n):
+    ss = n[1]*(np.abs(n[0])**gamma)
+    return ss
+
+def lognormal_model(gamma,n):
+    x = n[1]**gamma*n[2]-0.5*n[3]
+    return n[0]*(np.exp(x)-1.)
+
+def quadrature_model(gamma,n):
+    return n[0]*gamma*n[1]**gamma
+
+def quadrature_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
+    m_0 = np.mean(map_in);npix=map_in.size
+    cl_pl = fit_cl_conv(map_in,l_fit,theta)
+    #Generate from cl/2.
+    plt.figure()
+    plt.xscale('log');plt.yscale('log')
+    plt.plot(cl_pl)
+    plt.show()
+    d_g1 = hp.synfast(cl_pl[1:]/2.,nside=nside_o,verbose=False,new=True)
+    d_g2 = hp.synfast(cl_pl[1:]/2.,nside=nside_o,verbose=False,new=True)
+    n = np.sqrt(d_g1**2+d_g2**2)
+    R_mean = np.zeros(npix)
+    for i in np.arange(npix):
+        R_mean[i] = local_mean(map_in,i,(np.pi/180.)*4.)/m_0
+    parse_args = [R_mean,n]
+    res = minimize(chi_sq,.8,args=(cl_pl,pl_fit,quadrature_model,parse_args),method='Powell')
+    return quadrature_model(res.x,parse_args)
+
+def chi_sq(gamma,cl_pl,pl_fit,model,model_args):
+    model_map = model(gamma,model_args)
+    cl_model = hp.anafast(model_map)
+    ell = np.arange(cl_model.size)
+    chi_sq_arg = (cl_model[1:]/cl_pl[1:]-1)**2*(2*ell[1:]+1)/2
+    print gamma
+    return np.sum(chi_sq_arg[pl_fit[0]:pl_fit[1]])
+
+def mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
+    print('Fitting power law.')
+    cl_pl = fit_cl_conv(map_in,l_fit,theta)
+    d_g = hp.synfast(cl_pl[1:],nside=nside_o,verbose=False,new=True)
+    norm = (d_g-np.mean(d_g))/np.sqrt(np.var(d_g))
+    parse_args = [map_in,norm]
+    print('Minimizing chi squared at large l.')
+    res = minimize(chi_sq,0.6,args=(cl_pl,pl_fit,mod_gaussian_model,parse_args),method='Powell')
+    return mod_gaussian_model(res.x,parse_args)
+
+def lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
+    m_0 = np.mean(map_in);npix=map_in.size
+    d_ls = (map_in-m_0)/m_0
+    print('Fitting power law.')
+    cl_pl = fit_cl_conv(d_ls,l_fit,theta)
+    print('Computing local scaling.')
+    #Local scaling is the average over a radius of 4 degrees c.f. global average.
+    R_mean = np.zeros(npix)
+    for i in np.arange(npix):
+        R_mean[i] = local_mean(map_in,i,(np.pi/180.)*4.)/m_0
+    #Compute all the model parameters before finding correct gamma.
+    d_g = hp.synfast(cl_pl[1:],nside=nside_o,new=True)
+    d_g_var = np.var(d_g)
+    norm = np.min(map_in)/m_0
+    parse_args = [norm,R_mean,d_g,d_g_var]
+    #Now minimize chi sq for the free parameter gamma.
+    print('Minimizing chi squared')
+    res = minimize(chi_sq,0.5,args=(cl_pl,pl_fit,lognormal_model,parse_args),method='Powell')
+    d_ss = lognormal_model(res.x,parse_args)
+    return m_0*d_ss
+
+def generate_ss_map(map_in,nside_o,l_fit,pl_fit,theta,method):
+    if method=='mod_gaussian': 
+        if not True in list(map_in<0): 
+            print('mod_gaussian is intended for use on polarization maps only.')
+            exit()
+        return mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
+    
+    if method=='lognormal': 
+        if True in list(map_in<0):
+            print('lognormal method intended for use on intensity maps only.')
+            exit()
+        return lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
+    
+    if method=='quadrature':
+        if True in list(map_in<0):
+            print('quadrature method intended for use on intensity maps only.')
+            exit()
+        return quadrature_ss_map(map_in,nside_o,l_fit,pl_fit,theta)
+
+
+""" 
+OPTIONS:
+
+method    : options are 'lognormal' or 'mod_gaussian'.  'lognormal' can be used to generate
+            intensity map small scales as it ensures that the final map is positive.  
+            'mod_gaussian' can be used to add small scales to Q and U maps.  
+
+nside_in  : nside of input map. 
+nside_out : nside of output map.
+theta_res : the angular scale (in deg) of the limiting resolution of the input.
+
+l_fit     : the multipole range over which the power law is fitted.
+pl_fit    : range of multipoles over which the chi_sq fits.
+
+file_in   : address of input map. Should not be a multiple-map fits file.
+file_out  : where to put the final map with added small scales.
+"""
+
+method = 'quadrature'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
+
+nside_in = 256
+nside_out = 256
+theta_res = 1.
+
+l_fit = [20.,80.]
+pl_fit = [300.,600.]
+
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u_ss.fits'
+
+file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
+file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
+
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
+
+"""
+MAIN CODE
+"""
+
+map_in = read_map_wrapped(file_in, nside_in, 0)
+map_ss = generate_ss_map(map_in,nside_out,l_fit,pl_fit,theta_res,method)
+
+cl = hp.anafast(map_in)
+cl1 = hp.anafast(map_in+map_ss)
+
+plt.figure()
+plt.xscale('log');plt.yscale('log')
+plt.plot(cl)
+plt.plot(cl1)
+plt.show()
+
+hp.mollview(map_in)
+hp.mollview(map_in+map_ss)
+
+print('Writing new small scale map to '+file_out)
+
+hp.write_map(file_out,map_in+map_ss)
+
+
+
+
+

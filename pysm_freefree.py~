@@ -25,7 +25,8 @@ def main(fname_config):
         
         scaled_map_ff = scale_freqs(freefree,out)*conv_I[...,np.newaxis]
         scaled_map_ff_pol = np.zeros((2,np.asarray(out.output_frequency).size,hp.nside2npix(out.nside)))
-
+	print scaled_map_ff.shape
+	print scaled_map_ff_pol.shape
         if out.debug == True:
             ff = np.concatenate([scaled_map_ff[np.newaxis,...],scaled_map_ff_pol])
 	    for i in range(0,len(out.output_frequency)):
