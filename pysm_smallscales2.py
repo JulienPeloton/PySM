@@ -16,19 +16,10 @@ def sigma(fwhm):
 
 def fit_cl_conv(map,l_fit,theta):
     cl = hp.anafast(map)
-
     ell = np.arange(cl.size)
-
     coeffs = np.polyfit(safe_log10(ell[l_fit[0]:l_fit[1]]),safe_log10(cl[l_fit[0]:l_fit[1]]),1)
-
-    cl_pl = np.power(10,coeffs[1])*np.power(ell,coeffs[0])
-
+    cl_pl = np.power(10,coeffs[1])*np.power(ell,-2.5)
     print('Coefficients of power law fit:', coeffs)
-#    plt.figure()
-#    plt.xscale('log');plt.yscale('log')
-#    plt.plot(ell,cl_pl)
-#    plt.plot(ell,(1-b_l(ell,sigma(theta*60.)))**2)
-#    plt.plot(cl_pl*(1-b_l(ell,sigma(theta*60.)))**2)
     return cl_pl*(1-b_l(ell,sigma(theta*60.)))**2
 
 def local_mean(m,pix,radius): #radius is in radians
@@ -51,14 +42,33 @@ def quadrature_model(gamma,n):
 
 def quadrature_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
     m_0 = np.mean(map_in);npix=map_in.size
-    d_ss = map_in/m_0
+    d_ss = (map_in-m_0)/m_0
     print('Fitting power law.')
-    cl_pl = fit_cl_conv(d_ss,l_fit,theta)
+    cl_pl = 0.5*fit_cl_conv(d_ss,l_fit,theta)
+
     #Generate from cl/2.
     d_g1 = hp.synfast(cl_pl[1:],nside=nside_o,verbose=False,new=True)
-    d_g2 = hp.synfast(cl_pl[1:]/2.,nside=nside_o,verbose=False,new=True)
+    d_g2 = hp.synfast(cl_pl[1:],nside=nside_o,verbose=False,new=True)
     
-    n = m_0*np.sqrt(d_g1**2)
+    cl_1 = hp.anafast(d_g1)
+    cl_2 = hp.anafast(d_g2)
+
+    i = np.sqrt(d_g1**2+d_g2**2)
+    n = m_0*i
+
+    t = hp.anafast(np.sqrt(d_g1**2))
+    print t
+    cl_i = hp.anafast(i)
+
+    plt.figure()
+    plt.xscale('log');plt.yscale('log')
+    plt.plot(cl_pl)
+    plt.plot(t)
+#    plt.plot(cl_i)
+#    plt.plot(cl_1)
+#    plt.plot(cl_2)
+    plt.show()
+
     R_mean = np.zeros(npix)
     for i in np.arange(npix):
             R_mean[i] = local_mean(d_ss,i,(np.pi/180.)*4.)/m_0
@@ -144,23 +154,29 @@ file_in   : address of input map. Should not be a multiple-map fits file.
 file_out  : where to put the final map with added small scales.
 """
 
-method = 'quadrature'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
+method = 'lognormal'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
 
 nside_in = 256
 nside_out = 256
 theta_res = 1.
 
-l_fit = [20.,80.]
+l_fit = [60.,80.]
 pl_fit = [300.,600.]
 
 #file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u.fits'
 #file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u_ss.fits'
 
-file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
-file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_512_R2.00_q.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_512_R2.00_q_ss.fits'
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
+
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I_ss.fits'
+
+file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
+file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
 
 """
 MAIN CODE
