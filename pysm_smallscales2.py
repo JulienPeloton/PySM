@@ -172,11 +172,11 @@ pl_fit = [300.,600.]
 #file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
 #file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I_ss.fits'
+file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I.fits'
+file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I_ss.fits'
 
-file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
-file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
 
 """
 MAIN CODE
