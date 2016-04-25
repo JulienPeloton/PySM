@@ -44,6 +44,7 @@ if out.instrument_noise == True:
     sky = sky + pysm_noise.instrument_noise(parser.parse_args().config_file)
 
 
+
 comps =str()
 for i in sorted(out.components): comps = comps+i[0:4]+'_'
 if out.instrument_noise == True: comps = comps + 'noisy_'
