@@ -90,9 +90,9 @@ def mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
     cl_pl = fit_cl_conv(map_in,l_fit,theta)
     d_g = hp.synfast(cl_pl[1:],nside=nside_o,verbose=False,new=True)
     norm = (d_g-np.mean(d_g))/np.sqrt(np.var(d_g))
-    parse_args = [map_in,norm]
+    parse_args = [hp.smoothing(map_in,fwhm=(np.pi/180.)*theta),norm]
     print('Minimizing chi squared at large l.')
-    res = minimize(chi_sq,0.6,args=(cl_pl,pl_fit,mod_gaussian_model,parse_args),method='Powell')
+    res = minimize(chi_sq,1.0,args=(cl_pl,pl_fit,mod_gaussian_model,parse_args),method='Powell')
     return mod_gaussian_model(res.x,parse_args)
 
 def lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
@@ -112,7 +112,7 @@ def lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
     parse_args = [norm,R_mean,d_g,d_g_var]
     #Now minimize chi sq for the free parameter gamma.
     print('Minimizing chi squared')
-    res = minimize(chi_sq,0.5,args=(cl_pl,pl_fit,lognormal_model,parse_args),method='Powell')
+    res = minimize(chi_sq,1.,args=(cl_pl,pl_fit,lognormal_model,parse_args),method='Powell')
     d_ss = lognormal_model(res.x,parse_args)
     return m_0*d_ss
 
@@ -154,26 +154,29 @@ file_in   : address of input map. Should not be a multiple-map fits file.
 file_out  : where to put the final map with added small scales.
 """
 
-method = 'lognormal'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
+method = 'mod_gaussian'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
 
-nside_in = 256
-nside_out = 256
-theta_res = 1.
+nside_in = 512
+nside_out = 512
+theta_res = 3.
 
-l_fit = [60.,80.]
-pl_fit = [300.,600.]
+l_fit = [90.,140.]
+pl_fit = [140.,900.]
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_u.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_u_ss.fits'
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_512_R2.00_q.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_512_R2.00_q_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_u.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_u_ss.fits'
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_512.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/haslam408_dsds_Remazeilles2014_8p33_mono_sub_512_ss.fits'
 
-file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I.fits'
-file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I_ss.fits'
+file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_512.fits'
+file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_ss_512.fits'
+
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_dust-commander_0256_R2.00_I_ss.fits'
 
 #file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em.fits'
 #file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/smoothed_dust_em_ss.fits'
@@ -185,21 +188,25 @@ MAIN CODE
 map_in = read_map_wrapped(file_in, nside_in, 0)
 map_ss = generate_ss_map(map_in,nside_out,l_fit,pl_fit,theta_res,method)
 
-cl = hp.anafast(map_in)
-cl1 = hp.anafast(map_in+map_ss)
+map_smo = hp.smoothing(map_in,fwhm=(np.pi/180.)*theta_res)
+
+cl = hp.anafast(map_smo)
+cl1 = hp.anafast(map_smo+map_ss)
+cl2 = hp.anafast(map_in)
 
 plt.figure()
 plt.xscale('log');plt.yscale('log')
 plt.plot(cl)
+plt.plot(cl2)
 plt.plot(cl1)
 plt.show()
 
-hp.mollview(map_in)
-hp.mollview(map_in+map_ss)
+hp.mollview(map_smo)
+hp.mollview(map_smo+map_ss)
 
 print('Writing new small scale map to '+file_out)
 
-hp.write_map(file_out,map_in+map_ss)
+hp.write_map(file_out,map_smo+map_ss)
 
 
 

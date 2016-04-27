@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 import scipy.constants as const
 from pysm import read_map_wrapped
-
+import matplotlib.pyplot as plt
 
 def safe_log10(x,minval=0.0000000001):
     return np.log10(x.clip(min=minval))
@@ -54,7 +54,7 @@ def mod_gaussian_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
     print('Fitting power law.')
     cl_pl = fit_cl_conv(map_in,l_fit,theta)
     print('Minimizing chi squared at large l.')
-    res = minimize(chi_sq,0.6,args=(map_in,cl_pl,pl_fit,nside_o,'mod_gaussian'),method='Powell')
+    res = minimize(chi_sq,0.6,args=(hp.smoothing(map_in,fwhm=(np.pi/180)*theta),cl_pl,pl_fit,nside_o,'mod_gaussian'),method='Powell')
     return mod_gaussian_model(res.x,cl_pl,map_in,nside_o)
 
 def lognormal_ss_map(map_in,nside_o,l_fit,pl_fit,theta):
@@ -108,23 +108,39 @@ file_out  : where to put the final map with added small scales.
 
 method = 'mod_gaussian'  #options are 'lognormal' for intensity, or 'mod_gaussian' for polarization.
 
-nside_in = 1024
-nside_out = 1024
-theta_res = 1./6.
+nside_in = 512
+nside_out = 512
+theta_res = 3.
 
-l_fit = [60.,500.]
-pl_fit = [500.,1000.]
+l_fit = [100.,150.]
+pl_fit = [150.,1000.]
 
-file_in = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u.fits'
-file_out = '/Users/benthorne/Documents/DPhil/PySM/Plots/Data/templates/COM_CompMap_DustPol-commander_1024_R2.00_u_ss.fits'
+#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_q.fits'
+#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_q_ss.fits'
 
+file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_512.fits'
+file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotronmmamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_ss_512.fits'
 
 """
 MAIN CODE
 """
 
 map_in = read_map_wrapped(file_in, nside_in, 0)
+map_smo = hp.smoothing(map_in,fwhm=(np.pi/180.)*theta_res)
 map_ss = generate_ss_map(map_in,nside_out,l_fit,pl_fit,theta_res,method)
+
+map_smo = hp.smoothing(map_in,fwhm=(np.pi/180.)*theta_res)
+
+cl = hp.anafast(map_smo)
+cl1 = hp.anafast(map_smo+map_ss)
+cl2 = hp.anafast(map_in)
+
+plt.figure()
+plt.xscale('log');plt.yscale('log')
+plt.plot(cl)
+plt.plot(cl2)
+plt.plot(cl1)
+plt.show()
 
 print('Writing new small scale map to '+file_out)
 
