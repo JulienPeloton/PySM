@@ -42,7 +42,6 @@ def main(fname_config):
 
 	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config_model.write(configfile)
 
-	pops = Config_model.sections()
 	dust_out = 0.
 
 	for p in pops: 
