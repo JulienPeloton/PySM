@@ -23,6 +23,7 @@ def instrument_noise(fname_config):
     sigma_pix_pol = np.sqrt(out.instrument_noise_pol**2/pix_amin2)
 
     #Generate noise as gaussian with variances above:
+    np.random.seed(out.instrument_noise_seed)
     instrument_noise = np.random.randn(3,np.asarray(out.output_frequency).size,npix)
 
     #standard_normal*sigma+mu = N(mu,sigma)

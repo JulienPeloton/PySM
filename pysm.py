@@ -92,6 +92,7 @@ class output(object):
         self.bandpass = 'True' in config_dict['bandpass']
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
         self.instrument_noise = 'True' in config_dict['instrument_noise']
+        self.instrument_noise_seed = int(config_dict['instrument_noise_seed'])
         self.instrument_noise_i = np.asarray([float(i) for i in config_dict['instrument_noise_i'].split()])
         self.instrument_noise_pol = np.asarray([float(i) for i in config_dict['instrument_noise_pol'].split()])
 
