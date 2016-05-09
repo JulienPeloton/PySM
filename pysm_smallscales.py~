@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 import scipy.constants as const
 from pysm import read_map_wrapped
-
+import matplotlib.pyplot as plt
 
 def safe_log10(x,minval=0.0000000001):
     return np.log10(x.clip(min=minval))

@@ -115,9 +115,6 @@ theta_res = 3.
 l_fit = [100.,150.]
 pl_fit = [150.,1000.]
 
-#file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_q.fits'
-#file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/ThermalDust/mbb/COM_CompMap_DustPol-commander_512_R2.00_q_ss.fits'
-
 file_in = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotron/mamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_512.fits'
 file_out = '/Users/benthorne/Documents/DPhil/PySM/PySM/Ancillaries/Synchrotronmmamd2008/wmap_band_iqumap_r9_9yr_K_v5_q_ss_512.fits'
 
