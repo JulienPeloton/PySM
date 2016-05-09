@@ -1,5 +1,5 @@
 import ConfigParser, os
-import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise
+import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise, pysm_freefree
 from pysm import output
 import healpy as hp
 import numpy as np
@@ -37,6 +37,9 @@ if 'thermaldust' in out.components:
 if 'spinningdust' in out.components:
     sky = sky + pysm_spinningdust.main(parser.parse_args().config_file)
 
+if 'freefree' in out.components:
+    sky = sky + pysm_freefree.main(parser.parse_args().config_file)
+
 if 'cmb' in out.components:
     sky = sky + pysm_cmb.main(parser.parse_args().config_file)
 
@@ -46,7 +49,7 @@ if out.instrument_noise == True:
 
 
 comps =str()
-for i in sorted(out.components): comps = comps+i[0:4]+'_'
+for i in sorted(out.components): comps = comps+i[0:5]+'_'
 if out.instrument_noise == True: comps = comps + 'noisy_'
 fname = list()
 for i in range(len(out.output_frequency)): 

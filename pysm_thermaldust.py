@@ -19,7 +19,11 @@ def scale_dust_pop(pop,out,Config):
         unit_conversion_pol = conv_pol*conv2.reshape((len(out.output_frequency),1))
 
 	scaled_map_dust = scale_freqs(dust,out,pol=False)*dust.em_template*unit_conversion_I
+<<<<<<< HEAD
         scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
+=======
+	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
+>>>>>>> freefree
 
 	if out.debug == True:
                 dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])

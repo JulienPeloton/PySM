@@ -79,10 +79,18 @@ class component(object):
             self.thermaldust_polu = read_map_wrapped(cdict['thermaldust_polu'],nside_out)
         if 'pol_frac' in keys:
             self.pol_frac = float(cdict['pol_frac'])
+<<<<<<< HEAD
         if 'delens' in keys:
             self.delens = 'True' in cdict['delens']
         if 'delensing_ells' in keys:
             self.delensing_ells = np.loadtxt(cdict['delensing_ells'],unpack=True)
+=======
+        if 'ff_em_temp' in keys:
+            self.em = read_map_wrapped(cdict['ff_em_temp'],nside_out)
+        if 'ff_te_temp' in keys:
+            self.te = read_map_wrapped(cdict['ff_te_temp'],nside_out)
+
+>>>>>>> freefree
             
 class output(object):
     def __init__(self, config_dict):
@@ -166,6 +174,16 @@ def scale_freqs(c, o, pol=None, samples=10.):
 
          if o.bandpass == False: return ((c.freq_ref/freq)**2)[...,np.newaxis]*(arg1/f(arg2))
          else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis] * (arg1/f(arg2)), axis=np.ndim(freq)-1 ) / samples
+
+     if c.spectral_model=="freefree":
+
+             g_ff = np.log10(np.exp(5.960-(np.sqrt(3.)/np.pi)*np.log10(freq[...,np.newaxis]*(c.te*1.e-4)**-1.5))+np.exp(1))
+             tau = 0.05468*c.te**(-1.5)*freq[...,np.newaxis]**(-2)*c.em*g_ff
+             if o.bandpass==False:
+                 return 1.e6*c.te*(1.-np.exp(-tau))
+             else:
+                 return (1./freq_cen**2)[...,np.newaxis]*np.sum(1.e6*c.te*(1.-np.exp(-tau)) , axis=np.ndim(freq)-1 ) / samples
+     
 
      else:
         print('No law selected')
