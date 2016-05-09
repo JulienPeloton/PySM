@@ -6,6 +6,11 @@ from pysm import scale_freqs, convert_units, output, component
 def scale_dust_pop(pop,out,Config):
 
 	dust = component(Config._sections[pop],out.nside)
+	print('Computing dust maps.')
+	print '----------------------------------------------------- \n'
+	if out.debug == True: 
+		print ''.join("%s: %s \n" % item   for item in vars(dust).items())
+		print '----------------------------------------------------- \n'
 
 	conv_I = convert_units(dust.template_units, ['u','K_RJ'], dust.freq_ref)
         conv_pol =  convert_units(dust.template_units, ['u','K_RJ'], dust.pol_freq_ref)
@@ -37,14 +42,6 @@ def main(fname_config):
 
 	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config_model.write(configfile)
 
-	print('Computing dust maps.')
-	print '----------------------------------------------------- \n'
-	if out.debug == True: 
-		print ''.join("%s: %s \n" % item   for item in vars(dust).items())
-		print '----------------------------------------------------- \n'
-
-
-	pops = Config_model.sections()
 	dust_out = 0.
 
 	for p in pops: 
