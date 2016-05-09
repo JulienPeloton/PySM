@@ -19,11 +19,11 @@ nside : nside of final map
 
 """
 
-output_dir = './model7/'
+output_dir = './model2/'
 theta = 1.
 mean = 1.59
-sigma = 0.7
-nside = 256
+sigma = 0.2
+nside = 512
 
 """CODE"""
 
