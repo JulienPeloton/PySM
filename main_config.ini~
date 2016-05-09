@@ -1,10 +1,10 @@
 [GlobalParameters]
 #Current options are: synchrotron, thermaldust, spinningdust, and cmb. Do not use commas or quotes.
 #These components should each be assigned a model choice below 
-components = cmb
+components = thermaldust synchrotron spinningdust freefree cmb
 
 #Output frequency in GHz. Must match number of bandpass widths. No commas or quotes.
-output_frequency = 100. 
+output_frequency = 30. 44. 70. 100. 143. 217. 353. 545. 857.
 #Integrate over tophat bandpass of bandpass_widths centered at output_frequency, True or False.
 bandpass = False
 
@@ -32,7 +32,7 @@ debug = False
 #Directory in which outputs will be written. NOTE: the trailing '/' is required.
 output_dir = ./Output/
 #Optional prefix for the output files.
-output_prefix = one_
+output_prefix = test_
 
 
 #Each component is described in its own config file. Files are in /ConfigFiles/<model>_config.ini. The code will look there. 
