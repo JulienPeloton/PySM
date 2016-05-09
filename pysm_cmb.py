@@ -37,13 +37,26 @@ def main(fname_config):
 		cl_tebp_arr[0,2:]=2*np.pi*data[1]/(l[2:]*(l[2:]+1))      #TT
 		cl_tebp_arr[1,2:]=2*np.pi*data[2]/(l[2:]*(l[2:]+1))      #EE
 		cl_tebp_arr[2,2:]=2*np.pi*data[3]/(l[2:]*(l[2:]+1))      #BB
-		cl_tebp_arr[3,2:]=2*np.pi*data[5]/(l[2:]*(l[2:]+1))**2   #PP
+		cl_tebp_arr[4,2:]=2*np.pi*data[4]/(l[2:]*(l[2:]+1))      #TE
+                cl_tebp_arr[5,:] =np.zeros(lmax_cl+1)                    #EB
+		cl_tebp_arr[7,:] =np.zeros(lmax_cl+1)                    #TB
+
+		if CMB.delens == True:
+			print CMB.delensing_ells[1]
+			cl_tebp_arr[3,2:]=2*np.pi*data[5]*CMB.delensing_ells[1]/(l[2:]*(l[2:]+1))**2   #PP
+			cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
+			cl_tebp_arr[8,2:]=2*np.pi*data[7]*np.sqrt(CMB.delensing_ells[1])/(l[2:]*(l[2:]+1))**1.5 #EP
+			cl_tebp_arr[9,2:]=2*np.pi*data[6]*np.sqrt(CMB.delensing_ells[1])/(l[2:]*(l[2:]+1))**1.5 #TP
+		else: 
+			cl_tebp_arr[3,2:]=2*np.pi*data[5]/(l[2:]*(l[2:]+1))**2   #PP
+			cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
+			cl_tebp_arr[8,2:]=2*np.pi*data[7]/(l[2:]*(l[2:]+1))**1.5 #EP
+			cl_tebp_arr[9,2:]=2*np.pi*data[6]/(l[2:]*(l[2:]+1))**1.5 #TP
+
 		cl_tebp_arr[4,2:]=2*np.pi*data[4]/(l[2:]*(l[2:]+1))      #TE
 		cl_tebp_arr[5,:] =np.zeros(lmax_cl+1)                    #EB
-		cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
 		cl_tebp_arr[7,:] =np.zeros(lmax_cl+1)                    #TB
-		cl_tebp_arr[8,2:]=2*np.pi*data[7]/(l[2:]*(l[2:]+1))**1.5 #EP
-		cl_tebp_arr[9,2:]=2*np.pi*data[6]/(l[2:]*(l[2:]+1))**1.5 #TP
+
 
 # Coordinates of healpix pixel centers
 		ipos = np.array(hp.pix2ang(out.nside, np.arange(12*(out.nside**2))))
