@@ -79,18 +79,14 @@ class component(object):
             self.thermaldust_polu = read_map_wrapped(cdict['thermaldust_polu'],nside_out)
         if 'pol_frac' in keys:
             self.pol_frac = float(cdict['pol_frac'])
-<<<<<<< HEAD
         if 'delens' in keys:
             self.delens = 'True' in cdict['delens']
         if 'delensing_ells' in keys:
             self.delensing_ells = np.loadtxt(cdict['delensing_ells'],unpack=True)
-=======
         if 'ff_em_temp' in keys:
             self.em = read_map_wrapped(cdict['ff_em_temp'],nside_out)
         if 'ff_te_temp' in keys:
             self.te = read_map_wrapped(cdict['ff_te_temp'],nside_out)
-
->>>>>>> freefree
             
 class output(object):
     def __init__(self, config_dict):
