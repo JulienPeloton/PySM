@@ -1,4 +1,4 @@
-PySM v-0.2 
+PySM v-0.3
 Beta version.
 Most recent version available at: https://github.com/bthorne93/PySM
 
@@ -8,15 +8,14 @@ Contact: ben.thorne@physics.ox.ac.uk
 
 This code generates full-sky simulations of Galactic foregrounds in intensity and 
 polarization relevant for CMB experiments. The components simulated are: thermal dust, 
-synchrotron, AME, and CMB. Free-free will be added soon.
+synchrotron, AME, free-free, and CMB.
 
-Current version v-0.2 generates degree-scale smoothed maps, at Healpix Nside=256. There
+Current version v-0.3 generates degree-scale smoothed maps, at Healpix Nside=512. There
 exist options to integrate over a top hat bandpass, and to add white instrument noise in 
 intensity and polarization.
-Smaller-scales and different Nside available soon.
 
 There is scope for a few options for the model for each component, attempting to 
-be consistent with current data. The current v-0.2 version has typically two options 
+be consistent with current data. The current v-0.3 version has typically two options 
 for each component. 
 
 This code is based on the large-scale Galactic part of Planck Sky Model code and uses 
@@ -70,20 +69,22 @@ The nominal models used for the components are:
  frequencies with a mbb spectrum using the spatially varying temperature and spectral 
  index obtained from the Planck data using the Commander code (Planck Collaboration 
  2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for
- polarization as for intensity.  All input templates provided with the code have 
- already been degraded to Nside=256 and smoothed to degree scale. 
+ polarization as for intensity.  The input intensity template at 545 GHz has been 
+ provided at Nside=512.  The polarization templates have been provided degraded to 
+ Nside=512.  We also include a version smoothed to 1.8 deg  FWHM with small scales 
+ added via a Gaussian prescription. 
 
-'synchrotron1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with 
+'synchrotron1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with
 a spatially varying spectral index.  The emission templates are smoothed to degree scale
 and are the Haslam 408 MHz data reprocessed by Remazeilles et al 2015 MNRAS 451, 4311, 
-and the WMAP 7-year 23 GHz Q/U maps (Jarosik et al 2011 ApJS, 192, 14J), smoothed to 3 
-degree FWHM and with smaller scales added using the PSM code (Delabrouille et al. A&A 
-553, A96, 2013). The spectral index map was derived using a combination of the Haslam 
-408 MHz data and WMAP 23 GHz 7-year data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). 
-The same scaling is used for intensity and polarization.  This is the same prescription 
-as used in the Planck Sky Model's v1.7.8 'power law' option (Delabrouille et al. A&A 553, 
-A96, 2013), but with the Haslam map updated to the Remazeilles version. A 'curved power 
-law' model is also supported with a single isotropic curvature index.
+and the WMAP 9-year 23 GHz Q/U maps (Bennett, C.L., et.al., 2014, ApJS, 208, 20B), smoothed to 3 
+degree FWHM. We also provide a version with small scales added via a Gaussian prescription.
+The spectral index map was derived using a combination of the Haslam 408 MHz data and WMAP 23 
+GHz 7-year data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling 
+is used for intensity and polarization.  This is the same prescription as used in the 
+Planck Sky Model's v1.7.8 'power law' option (Delabrouille et al. A&A 553, A96, 2013), 
+but with the Haslam map updated to the Remazeilles version. A 'curved power law' 
+model is also supported with a single isotropic curvature index.
 
 'spdust1' = Spinning Dust: We model the AME as a sum of two spinning dust populations 
 based on the Commander code (Planck Collaboration 2015, arXiv:1502.01588). A component 
@@ -92,6 +93,11 @@ emission law. Both populations have a spatially varying emission template, one
 population has a spatially varying peak frequency, and the other population has a 
 spatially constant peak frequency.  The emission law is generated using the SpDust2 code 
 (Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904). The nominal model is unpolarized.  
+
+'freefree1' = Free-Free: We model the free-free emission using the analytic model 
+assumed in the Commander fit to the Planck 2015 data (Draine 2011 'Physics of the 
+Interstellar and Intergalactic Medium'). The templates of emission measure and effective
+temperature are provided at Nside=512. 
 
 'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute 
 a lensed CMB realisation using nearest-neighbour Taylor interpolation 
