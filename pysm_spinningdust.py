@@ -23,7 +23,8 @@ def main(fname_config):
         print ''.join("%s: %s \n" % item   for item in vars(spdust1).items())
         print ''.join("%s: %s \n" % item   for item in vars(spdust2).items())
         print '----------------------------------------------------- \n'
-
+    with open(out.output_dir+out.output_prefix+'spdust_config.ini','w') as configfile: Config.write(conf\
+igfile)
 #Compute a map of the polarisation angle from the commander dust map polariationn angle. 
     
     pol_angle = np.arctan2(spdust_general.thermaldust_polu,spdust_general.thermaldust_polq)
