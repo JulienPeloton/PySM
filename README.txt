@@ -70,16 +70,14 @@ The nominal models used for the components are:
  index obtained from the Planck data using the Commander code (Planck Collaboration 
  2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for
  polarization as for intensity.  The input intensity template at 545 GHz has been 
- provided at Nside=512.  The polarization templates have been provided degraded to 
- Nside=512.  We also include a version smoothed to 1.8 deg  FWHM with small scales 
- added via a Gaussian prescription. 
+ provided at Nside=512 smoothed to 1 degree fwhm.  The polarization templates have been provided degraded to 
+ Nside=512 smoothed to 2 degrees fwhm. 
 
 'synchrotron1' = Synchrotron:  A power law scaling is used for the synchrotron emission, with
 a spatially varying spectral index.  The emission templates are smoothed to degree scale
 and are the Haslam 408 MHz data reprocessed by Remazeilles et al 2015 MNRAS 451, 4311, 
-and the WMAP 9-year 23 GHz Q/U maps (Bennett, C.L., et.al., 2014, ApJS, 208, 20B), smoothed to 3 
-degree FWHM. We also provide a version with small scales added via a Gaussian prescription.
-The spectral index map was derived using a combination of the Haslam 408 MHz data and WMAP 23 
+and the WMAP 9-year 23 GHz Q/U maps (Bennett, C.L., et.al., 2014, ApJS, 208, 20B), smoothed to 2
+degree FWHM.The spectral index map was derived using a combination of the Haslam 408 MHz data and WMAP 23 
 GHz 7-year data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling 
 is used for intensity and polarization.  This is the same prescription as used in the 
 Planck Sky Model's v1.7.8 'power law' option (Delabrouille et al. A&A 553, A96, 2013), 
@@ -103,15 +101,22 @@ temperature are provided at Nside=512.
 a lensed CMB realisation using nearest-neighbour Taylor interpolation 
 (https://github.com/amaurea/taylens; Naess, S. K. and Louis, T. JCAP 09 001, 2013, 
 astro-ph/1307.0719). This code takes, as an input, a set of unlensed Cl's generated 
-using CAMB (http://www.camb.info/). The params.ini is in the Ancillary directory.
+using CAMB (http://www.camb.info/). The params.ini is in the Ancillary directory. 
+There is a pre-computed CMB map provided, with intensity smoothed to 1 degree
+and polarization smoothed to 2 degrees.
 
 ----------------------------------------------------------------------------
 
 Variations on the components (so far) are:
 
-'dust2' = emissivity that varies spatially on degree scales, drawn from a Gaussian 
-with beta=1.59 \pm 0.2. A Gaussian variation is not physically motivated, but 
+'dust2' ('dust3') = emissivity that varies spatially on degree scales, drawn from a Gaussian 
+with beta=1.59 \pm 0.2 (0.3). A Gaussian variation is not physically motivated, but 
 amount of variation consistent with Planck.
+
+'dust4' = a generalization of model 1 to multiple dust populations.  It has been found that
+a two component model is still a good fit to the Planck data.  This option uses the two 
+component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999,Astrophysical Journal, 
+524, 867.  
 
 'synchrotron2' = synchrotron index steepens off the Galactic plane, from -3.0 in the 
 plane to -3.3 off the plane. Consistent with WMAP.
