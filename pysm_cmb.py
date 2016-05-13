@@ -42,7 +42,7 @@ def main(fname_config):
 		cl_tebp_arr[7,:] =np.zeros(lmax_cl+1)                    #TB
 
 		if CMB.delens == True:
-			print CMB.delensing_ells[1]
+
 			cl_tebp_arr[3,2:]=2*np.pi*data[5]*CMB.delensing_ells[1]/(l[2:]*(l[2:]+1))**2   #PP
 			cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
 			cl_tebp_arr[8,2:]=2*np.pi*data[7]*np.sqrt(CMB.delensing_ells[1])/(l[2:]*(l[2:]+1))**1.5 #EP
