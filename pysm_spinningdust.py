@@ -19,7 +19,7 @@ def main(fname_config):
     print('Computing spinning dust map.')
     print '----------------------------------------------------- \n'
 
-    if out.debug == True:
+    if out.debug:
         print ''.join("%s: %s \n" % item   for item in vars(spdust1).items())
         print ''.join("%s: %s \n" % item   for item in vars(spdust2).items())
         print '----------------------------------------------------- \n'
@@ -38,7 +38,7 @@ def main(fname_config):
     scaled_map_spdust = scale_freqs(spdust1,out,pol=False)*spdust1.em_template*unit_conversion1 + scale_freqs(spdust2,out,pol=False)*spdust2.em_template*unit_conversion2
     scaled_map_spdust_pol = scaled_map_spdust[np.newaxis,...]*np.asarray([np.cos(pol_angle),np.sin(pol_angle)])[:,np.newaxis,:]*spdust_general.pol_frac
 
-    if out.debug == True:
+    if out.debug:
         for i in range(0,len(out.output_frequency)):
             hp.write_map(out.output_dir+'spdust_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
 

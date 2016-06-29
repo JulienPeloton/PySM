@@ -16,7 +16,7 @@ def main(fname_config):
 
 	print('Computing synchrotron maps.')
 	print '----------------------------------------------------- \n'
-	if out.debug == True:
+	if out.debug:
 		print ''.join("%s: %s \n" % item   for item in vars(synch).items())
 		print '----------------------------------------------------- \n'
 
@@ -40,7 +40,7 @@ def main(fname_config):
 
 #-------
 
-	if out.debug == True:
+	if out.debug:
 		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
 		for i in range(0,len(out.output_frequency)):
 			hp.write_map(out.output_dir+out.output_prefix+'synch_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',syn[:,i,:],coord='G',column_units=out.output_units)

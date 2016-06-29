@@ -22,7 +22,7 @@ def scale_dust_pop(pop,out,Config):
 	scaled_map_dust_pol = scale_freqs(dust,out,pol=True)[np.newaxis,...]*np.array([dust.polq_em_template,dust.polu_em_template])[:,np.newaxis,:]*unit_conversion_pol
 
 
-	if out.debug == True:
+	if out.debug:
                 dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
                 for i in range(0,len(out.output_frequency)):
                         hp.write_map(out.output_dir+out.output_prefix+'dust_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',dus[:,i,:],coord='G',column_units=out.output_units)

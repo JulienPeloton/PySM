@@ -17,7 +17,7 @@ def main(fname_config):
 
         print('Computing free-free maps.')
         print '----------------------------------------------------- \n'
-        if out.debug == True:
+        if out.debug:
                 print ''.join("%s: %s \n" % item   for item in vars(freefree).items())
                 print '----------------------------------------------------- \n'
         
@@ -26,7 +26,7 @@ def main(fname_config):
         scaled_map_ff = scale_freqs(freefree,out)*conv_I[...,np.newaxis]*freefree.em_template
         scaled_map_ff_pol = np.zeros((2,np.asarray(out.output_frequency).size,hp.nside2npix(out.nside)))
 
-        if out.debug == True:
+        if out.debug:
             ff = np.concatenate([scaled_map_ff[np.newaxis,...],scaled_map_ff_pol])
 	    for i in range(0,len(out.output_frequency)):
 		    hp.write_map(out.output_dir+out.output_prefix+'ff_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',ff[:,i,:],coord='G',column_units=out.output_units)
