@@ -103,7 +103,10 @@ class output(object):
         self.bandpass = 'True' in config_dict['bandpass']
         self.bandpass_widths = [float(i) for i in config_dict['bandpass_widths'].split()]
         self.instrument_noise = 'True' in config_dict['instrument_noise']
-        self.instrument_noise_seed = int(config_dict['instrument_noise_seed'])
+        if config_dict['instrument_noise_seed'] == 'None': 
+            self.instrument_noise_seed = None
+        else:
+            self.instrument_noise_seed = int(config_dict['instrument_noise_seed'])
         self.instrument_noise_i = np.asarray([float(i) for i in config_dict['instrument_noise_i'].split()])
         self.instrument_noise_pol = np.asarray([float(i) for i in config_dict['instrument_noise_pol'].split()])
 
@@ -126,8 +129,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
     
      freq = np.asarray(np.copy(o.output_frequency))
 
-     if pol == False: freq_ref = c.freq_ref
-     if pol == True: freq_ref = c.pol_freq_ref
+     if pol == False: freq_ref = np.copy(c.freq_ref)
+     if pol == True: freq_ref = np.copy(c.pol_freq_ref)
 
      if o.bandpass == True: 
          widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in o.bandpass_widths])
@@ -138,9 +141,9 @@ def scale_freqs(c, o, pol=None, samples=10.):
 
 #Note that the bandpass has to be done in non-thermodynamic units, so there are factors of frequency squared inside and outside the integral to account for switching between the two unit systems.
 
-     if c.spectral_model=="curvepowerlaw": 
-         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log10(freq[...,np.newaxis]/c.freq_curve))
-         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log10(freq[...,np.newaxis]/c.freq_curve)),axis=np.ndim(freq)-1)/samples
+     if c.spectral_model=="curvedpowerlaw": 
+         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_curve)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))*(freq_ref/c.freq_curve)**(-c.beta_curve*np.log(freq_ref/c.freq_curve)-c.beta_template)
+         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_curve)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))*(freq_ref/c.freq_curve)**(-c.beta_curve*np.log(freq_ref/c.freq_curve)-c.beta_template),axis=np.ndim(freq)-1)/samples
 
 
      if c.spectral_model=="powerlaw": 
@@ -172,14 +175,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
          else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis] * (arg1/f(arg2)), axis=np.ndim(freq)-1 ) / samples
 
      if c.spectral_model=="freefree":
-
-             g_ff = np.log10(np.exp(5.960-(np.sqrt(3.)/np.pi)*np.log10(freq[...,np.newaxis]*(c.te*1.e-4)**-1.5))+np.exp(1))
-             tau = 0.05468*c.te**(-1.5)*freq[...,np.newaxis]**(-2)*c.em*g_ff
-             if o.bandpass==False:
-                 return 1.e6*c.te*(1.-np.exp(-tau))
-             else:
-                 return (1./freq_cen**2)[...,np.newaxis]*np.sum(1.e6*c.te*(1.-np.exp(-tau)) , axis=np.ndim(freq)-1 ) / samples
-     
+         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_ref)**-2.17
+         else: return (1/freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**-2.17, axis=np.ndim(freq)-1 ) / samples
 
      else:
         print('No law selected')
