@@ -109,6 +109,9 @@ class output(object):
             self.instrument_noise_seed = int(config_dict['instrument_noise_seed'])
         self.instrument_noise_i = np.asarray([float(i) for i in config_dict['instrument_noise_i'].split()])
         self.instrument_noise_pol = np.asarray([float(i) for i in config_dict['instrument_noise_pol'].split()])
+        self.smoothing = 'True' in config_dict['smoothing']
+        self.fwhm = [float(i) for i in config_dict['fwhm'].split()]
+        
 
 def convert_units(u_from, u_to, freq): #freq in GHz
 
@@ -353,3 +356,25 @@ def tprint(msg):
         if t0 is None: t0 = time.time()
         print >> sys.stderr, "%8.2f %s" % (time.time()-t0,msg)
 
+#Now a few tools for fits handling.
+
+def condense_list(models):
+    mod_names =[f[1] for f in models]
+    return [(f[0],' '.join(mod_names))]
+
+
+def config2list(config):
+    info = []
+    for f in config.sections(): info = info+config._sections[f].items()
+    info = filter(lambda f: not f[0]=='__name__',info)
+    models = filter(lambda f: f[0]=='model',info)
+    not_models = filter(lambda f: not f[0]=='model',info)
+    models = condense_list(models)
+    info = not_models+models
+    info = add_hierarch(info)
+    return info
+
+def add_hierarch(lis):
+    for i, item in enumerate(lis):
+        lis[i]= ('HIERARCH '+item[0],item[1])
+    return lis
