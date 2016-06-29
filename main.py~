@@ -14,7 +14,7 @@ Config = ConfigParser.ConfigParser()
 Config.read(parser.parse_args().config_file)
 out = output(Config._sections['GlobalParameters'])
 
-if out.debug:
+if out.debug == True:
 
 ##Print information about the run:
     print '----------------------------------------------------- \n'
@@ -43,7 +43,7 @@ if 'freefree' in out.components:
 if 'cmb' in out.components:
     sky = sky + pysm_cmb.main(parser.parse_args().config_file)
 
-if out.instrument_noise:
+if out.instrument_noise == True:
     sky = sky + pysm_noise.instrument_noise(parser.parse_args().config_file)
 
 #Smooth sky maps by defined FWHM.
