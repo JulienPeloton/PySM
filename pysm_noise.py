@@ -3,7 +3,7 @@ import numpy as np
 import ConfigParser
 from pysm import output,convert_units
 
-def instrument_noise(fname_config):
+def main(fname_config):
 
     Config = ConfigParser.ConfigParser()
     Config.read(fname_config)
