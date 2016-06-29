@@ -20,7 +20,7 @@ def main(fname_config):
 		print ''.join("%s: %s \n" % item   for item in vars(synch).items())
 		print '----------------------------------------------------- \n'
 
-#The unit conversion takes care of the scaling being done in MJysr. After scaling we convert to whatever the output units are.
+#The unit conversion takes care of the scaling being done in uK_RJ. After scaling we convert to whatever the output units are.
 	conv_I = convert_units(synch.template_units, ['u','K_RJ'], synch.freq_ref)
 	conv_pol = convert_units(synch.template_units, ['u','K_RJ'], synch.pol_freq_ref) 
 	conv2 = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
