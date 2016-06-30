@@ -6,31 +6,35 @@ import numpy as np
 import argparse
 from multiprocessing import Manager, Process, Queue
 
+pysm_submods = {
+    'thermaldust':pysm_thermaldust,
+    'synchrotron':pysm_synchrotron,
+    'cmb':pysm_cmb,
+    'noise':pysm_noise,
+    'freefree':pysm_freefree,
+    'spinningdust':pysm_spinningdust
+}
+
 def run_pysm_comp(pysm_comp,config_file,result):
-    if 'synchrotron' == pysm_comp:
-        result[pysm_comp] = pysm_synchrotron.main(config_file)
+    result[pysm_comp] = pysm_submods[pysm_comp].main(config_file)
 
-    if 'thermaldust' == pysm_comp:
-        result[pysm_comp] =  pysm_thermaldust.main(config_file)
+def file_path(o,freq):
+    comps = str()
+    for i in sorted(o.components): comps='_'.join([comps,i[0:5]])
+    fname = ''.join([o.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(o.nside), '.fits'])
+    path = os.path.join(o.output_dir, fname)
+    return path
 
-    if 'spinningdust' == pysm_comp:
-        result[pysm_comp] = pysm_spinningdust.main(config_file)
+def smooth_write(sky_freq,o,freq,fwhm):
+    if o.smoothing: sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
 
-    if 'freefree' == pysm_comp:
-        result[pysm_comp] = pysm_freefree.main(config_file)
-
-    if 'cmb' == pysm_comp:
-        result[pysm_comp] = pysm_cmb.main(config_file)
-
-    if 'noise' == pysm_comp:
-        result[pysm_comp] == pysm_noise.main(config_file)
-
+    path = file_path(o,freq)
+    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
+    
 if __name__ == '__main__':
-
 
     parser = argparse.ArgumentParser(description='Code to simulate galactic foregrounds.')
     parser.add_argument('config_file', help='Main configuration file.')
-
     
 ##Get the output directory in order to save the configuration file.
     Config = ConfigParser.ConfigParser()
@@ -53,8 +57,6 @@ if __name__ == '__main__':
 #Create synchrotron, dust, AME, freefree,  and cmb maps at output frequencies then add noise.
     if out.instrument_noise: out.components.append('noise')
 
-
-#    result = Queue()
     result = Manager().dict()
     
     processes = [Process(target=run_pysm_comp,args=(comp,parser.parse_args().config_file,result)) for comp in out.components]
@@ -66,27 +68,19 @@ if __name__ == '__main__':
 #Change to orering: (frequency, stokes param, pixels)
     sky = np.swapaxes(sky,0,1)
 
-#Smooth maps if asked for.
+
     if out.smoothing:
         print 'Smoothing output maps.'
         print '----------------------------------------------------- \n'
-        for i,fwhm in enumerate(out.fwhm):
-            sky[i,...] = hp.smoothing(sky[i,...],fwhm=(np.pi/180.)*fwhm,verbose=False)
 
-#Write maps to ouput directory.
-    comps = str()
-    for i in sorted(out.components): comps='_'.join([comps,i[0:5]])
-
-    for i,freq in enumerate(out.output_frequency): 
-    
-        fname = ''.join([out.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(out.nside), '.fits'])
-        path = os.path.join(out.output_dir, fname)
-        
-        hp.write_map(path, hp.ud_grade(sky[i,...], nside_out=out.nside), coord='G', column_units = ''.join(out.output_units), column_names = None, extra_header = config2list(Config))
-
-        if out.debug: print 'Written to %s'%path
+    processes = [Process(target=smooth_write,args=(sky[i,...],out,freq,fwhm)) for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm))]
+    for p in processes: p.start()
+    for p in processes: p.join()
 
     print '-----------------------------------------------------\n'
-    print 'PySM completed successfully. \n' 
+    print 'PySM completed successfully. \n'
     print '-----------------------------------------------------'
+
+
+
 

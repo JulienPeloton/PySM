@@ -92,10 +92,11 @@ population has a spatially varying peak frequency, and the other population has 
 spatially constant peak frequency.  The emission law is generated using the SpDust2 code 
 (Ali-Haimoud 2008, http://arxiv.org/abs/0812.2904). The nominal model is unpolarized.  
 
-'freefree1' = Free-Free: We model the free-free emission using the analytic model 
+'freefree1' = Free-Free: We model the free-free emission using a power law sacling of 
+-2.17 of an intensity map at 30 GHz produced using the analytic model 
 assumed in the Commander fit to the Planck 2015 data (Draine 2011 'Physics of the 
-Interstellar and Intergalactic Medium'). The templates of emission measure and effective
-temperature are provided at Nside=512. 
+Interstellar and Intergalactic Medium') and the templates of emission measure and effective
+temperature provided.  
 
 'cmb1' = CMB: A lensed CMB realisation is computed using Taylens, a code to compute 
 a lensed CMB realisation using nearest-neighbour Taylor interpolation 
@@ -103,7 +104,8 @@ a lensed CMB realisation using nearest-neighbour Taylor interpolation
 astro-ph/1307.0719). This code takes, as an input, a set of unlensed Cl's generated 
 using CAMB (http://www.camb.info/). The params.ini is in the Ancillary directory. 
 There is a pre-computed CMB map provided, with intensity smoothed to 1 degree
-and polarization smoothed to 2 degrees.
+and polarization smoothed to 2 degrees.  There is also an option to delens by a 
+simple factor. 
 
 ----------------------------------------------------------------------------
 
@@ -120,6 +122,8 @@ component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999,Astrop
 
 'synchrotron2' = synchrotron index steepens off the Galactic plane, from -3.0 in the 
 plane to -3.3 off the plane. Consistent with WMAP.
+
+'synchrotron3' = curved synchrotron index. Follows the model presented in Kogut 2012.
 
 'spdust2' = AME has 2% polarization fraction. Polarized maps simulated with thermal 
 dust angles and nominal AME intensity scaled globally by polarization fraction. 
