@@ -1,10 +1,10 @@
 import ConfigParser, os
-import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise, pysm_freefree
-from pysm import output,config2list
+import pysm_synchrotron, pysm_thermaldust, pysm_cmb,pysm_spinningdust, pysm_noise, pysm_freefree
+from pysm import output, config2list#, run_pysm_comp, file_path, smooth_write
 import healpy as hp
 import numpy as np
 import argparse
-from multiprocessing import Manager, Process, Queue
+from multiprocessing import Manager, Process
 
 pysm_submods = {
     'thermaldust':pysm_thermaldust,

@@ -24,6 +24,22 @@ units = {
     'Jysr': lambda x: np.ones(x.size)
 }
 
+def run_pysm_comp(pysm_comp,config_file,result):
+    result[pysm_comp] = pysm_submods[pysm_comp].main(config_file)
+
+def file_path(o,freq):
+    comps = str()
+    for i in sorted(o.components): comps='_'.join([comps,i[0:5]])
+    fname = ''.join([o.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(o.nside), '.fits'])
+    path = os.path.join(o.output_dir, fname)
+    return path
+
+def smooth_write(sky_freq,o,freq,fwhm):
+    if o.smoothing: sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
+
+    path = file_path(o,freq)
+    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
+
 def read_map_wrapped(fname,nside_out,field=0) :
     return hp.ud_grade(np.array(hp.read_map(fname,field=field,verbose=False)),nside_out=nside_out)
 # Switch to this if you don't want to ud_grade on input
