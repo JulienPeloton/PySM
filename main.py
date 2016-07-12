@@ -26,7 +26,10 @@ def file_path(o,freq):
     return path
 
 def smooth_write(sky_freq,o,freq,fwhm):
-    if o.smoothing: sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
+    if o.smoothing: 
+        print 'Smoothing output maps.'
+        print '----------------------------------------------------- \n'
+        sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
 
     path = file_path(o,freq)
     hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
@@ -68,14 +71,7 @@ if __name__ == '__main__':
 #Change to orering: (frequency, stokes param, pixels)
     sky = np.swapaxes(sky,0,1)
 
-
-    if out.smoothing:
-        print 'Smoothing output maps.'
-        print '----------------------------------------------------- \n'
-
-    processes = [Process(target=smooth_write,args=(sky[i,...],out,freq,fwhm)) for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm))]
-    for p in processes: p.start()
-    for p in processes: p.join()
+    for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm)): smooth_write(sky[i,...],out,freq,fwhm)
 
     print '-----------------------------------------------------\n'
     print 'PySM completed successfully. \n'
