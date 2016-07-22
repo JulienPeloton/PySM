@@ -9,6 +9,9 @@
 - Changed curved synchrotron power law option to follow Kogut 2012 curvature model. (29.6.16)
 - Change free-free emission to be a -2.17 power law rather than analytical for from Commander. (29.6.16)  
 
+- Added all final small scale maps. 
+- Added a gitignore.
+
 **Merged pull requests:**
 
 - made debug optional with default 'False' [\#6](https://github.com/bthorne93/PySM/pull/6) ([damonge](https://github.com/damonge))
