@@ -1,4 +1,4 @@
-PySM v-0.3
+added PySM v-0.3
 Beta version.
 Most recent version available at: https://github.com/bthorne93/PySM
 
