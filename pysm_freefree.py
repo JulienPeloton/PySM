@@ -22,7 +22,9 @@ def main(fname_config):
                 print '----------------------------------------------------- \n'
         
         conv_I = convert_units(freefree.template_units,out.output_units,out.output_frequency)
-        
+        print conv_I
+	print scale_freqs(freefree,out)
+	
         scaled_map_ff = scale_freqs(freefree,out)*conv_I[...,np.newaxis]*freefree.em_template
         scaled_map_ff_pol = np.zeros((2,np.asarray(out.output_frequency).size,hp.nside2npix(out.nside)))
 

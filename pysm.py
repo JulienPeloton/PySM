@@ -142,8 +142,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
 #Note that the bandpass has to be done in non-thermodynamic units, so there are factors of frequency squared inside and outside the integral to account for switching between the two unit systems.
 
      if c.spectral_model=="curvedpowerlaw": 
-         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_curve)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))*(freq_ref/c.freq_curve)**(-c.beta_curve*np.log(freq_ref/c.freq_curve)-c.beta_template)
-         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_curve)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))*(freq_ref/c.freq_curve)**(-c.beta_curve*np.log(freq_ref/c.freq_curve)-c.beta_template),axis=np.ndim(freq)-1)/samples
+         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))
+         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve)),axis=np.ndim(freq)-1)/samples
 
 
      if c.spectral_model=="powerlaw": 
@@ -175,8 +175,8 @@ def scale_freqs(c, o, pol=None, samples=10.):
          else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis] * (arg1/f(arg2)), axis=np.ndim(freq)-1 ) / samples
 
      if c.spectral_model=="freefree":
-         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_ref)**-2.17
-         else: return (1/freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**-2.17, axis=np.ndim(freq)-1 ) / samples
+         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_ref)**-2.14
+         else: return (1/freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**-2.14, axis=np.ndim(freq)-1 ) / samples
 
      else:
         print('No law selected')

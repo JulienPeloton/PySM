@@ -1,0 +1,8 @@
+#ignore outputs
+./Output/*
+
+#ignore all python binaries
+*.pyc
+
+#and all local records
+*~
