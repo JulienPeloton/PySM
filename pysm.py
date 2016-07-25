@@ -29,33 +29,58 @@ def condense_list(models):
     mod_names =[f[1] for f in models]
     return [(f[0],' '.join(mod_names))]
 
-def file_path(o,freq):
+def file_path(o,j):
     comps = str()
-    for i in sorted(o.components): comps='_'.join([comps,i[0:5]])
-    fname = ''.join([o.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(o.nside), '.fits'])
+    for k in sorted(o.components): 
+        comps='_'.join([comps,k[0:5]])
+    fname = ''.join([o.output_prefix,comps, str(o.output_frequency[j]).replace('.', 'p'),'_', str(o.nside), '.fits'])
     path = os.path.join(o.output_dir, fname)
     return path
 
-def smooth_write(sky_freq,o,freq,fwhm,Config):
+def smooth_write(sky_freq,o,Config,i):
     if o.smoothing:
-        sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
-    path = file_path(o,freq)
-    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
+        sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*o.fwhm[i],verbose=False)
+    path = file_path(o,i)
+    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config,o,i))
 
-def config2list(config):
+def config2list(config,o,i):
     info = []
-    for f in config.sections(): info = info+config._sections[f].items()
-    info = filter(lambda f: not f[0]=='__name__',info)
+
+    exclude = ['__name__','output_frequency','instrument_noise',
+               'instrument_noise_i','instrument_noise_pol','smoothing',
+               'fwhm','bandpass','bandpass_widths','instrument_noise_seed']
+
+    for f in config.sections(): 
+        info += config._sections[f].items()
+
+    info = filter(lambda f: (not f[0] in exclude),info)
     models = filter(lambda f: f[0]=='model',info)
     not_models = filter(lambda f: not f[0]=='model',info)
     models = condense_list(models)
+    
     info = not_models+models
+    
+    info += [('freq',o.output_frequency[i],'GHz')]
+
+    if o.smoothing:
+        info += [('fwhm',o.fwhm[i],'degrees')]
+
+    if o.bandpass:
+        info += [('bandpass_width',o.bandpass_widths[i],'GHz')]
+
+    if o.instrument_noise:
+        info += [('instrument_noise_i',o.instrument_noise_i[i],'uK_CMB amin'),
+                 ('instrument_noise_pol',o.instrument_noise_pol[i],'uK_CMB amin'),
+                  ('instrument_noise_seed',o.instrument_noise_seed)]
     info = add_hierarch(info)
     return info
 
 def add_hierarch(lis):
     for i, item in enumerate(lis):
-        lis[i]= ('HIERARCH '+item[0],item[1])
+        if len(item) == 3:
+            lis[i]= ('HIERARCH '+item[0],item[1],item[2])
+        else:
+            lis[i]= ('HIERARCH '+item[0],item[1])
     return lis
 
 def read_map_wrapped(fname,nside_out,field=0) :

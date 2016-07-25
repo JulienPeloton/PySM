@@ -57,7 +57,7 @@ if __name__ == '__main__':
         print 'Smoothing output maps.'
         print '----------------------------------------------------- \n'
 
-    for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm)): smooth_write(sky[i,...],out,freq,fwhm,Config)
+    for i in xrange(len(out.output_frequency)): smooth_write(sky[i,...],out,Config,i)
     
     print '-----------------------------------------------------\n'
     print 'PySM completed successfully. \n' 
