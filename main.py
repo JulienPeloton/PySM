@@ -1,6 +1,6 @@
 import ConfigParser, os
 import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise, pysm_freefree
-from pysm import output
+from pysm import output, config2list
 import healpy as hp
 import numpy as np
 import argparse
@@ -14,10 +14,9 @@ def file_path(o,freq):
 
 def smooth_write(sky_freq,o,freq,fwhm):
     if o.smoothing:
-        print 'Smoothing output maps.'
-        print '----------------------------------------------------- \n'
         sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
-
+    path = file_path(o,freq)
+    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
 
 if __name__ == '__main__':
 
@@ -66,6 +65,10 @@ if __name__ == '__main__':
         out.components.append('noise')
 
     sky = np.swapaxes(sky,0,1)
+
+    if out.smoothing:
+        print 'Smoothing output maps.'
+        print '----------------------------------------------------- \n'
 
     for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm)): smooth_write(sky[i,...],out,freq,fwhm)
     

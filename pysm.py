@@ -130,6 +130,9 @@ class output(object):
             self.instrument_noise_seed = int(config_dict['instrument_noise_seed'])
         self.instrument_noise_i = np.asarray([float(i) for i in config_dict['instrument_noise_i'].split()])
         self.instrument_noise_pol = np.asarray([float(i) for i in config_dict['instrument_noise_pol'].split()])
+        self.smoothing = 'True' in config_dict['smoothing']
+        self.fwhm = [float(i) for i in config_dict['fwhm'].split()]
+
 
 def convert_units(u_from, u_to, freq): #freq in GHz
 
