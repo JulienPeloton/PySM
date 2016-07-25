@@ -1,22 +1,9 @@
 import ConfigParser, os
 import pysm_synchrotron,pysm_thermaldust,pysm_cmb,pysm_spinningdust, pysm_noise, pysm_freefree
-from pysm import output, config2list
+from pysm import output, config2list, file_path, smooth_write
 import healpy as hp
 import numpy as np
 import argparse
-
-def file_path(o,freq):
-    comps = str()
-    for i in sorted(o.components): comps='_'.join([comps,i[0:5]])
-    fname = ''.join([o.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(o.nside), '.fits'])
-    path = os.path.join(o.output_dir, fname)
-    return path
-
-def smooth_write(sky_freq,o,freq,fwhm):
-    if o.smoothing:
-        sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
-    path = file_path(o,freq)
-    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
 
 if __name__ == '__main__':
 
@@ -70,7 +57,7 @@ if __name__ == '__main__':
         print 'Smoothing output maps.'
         print '----------------------------------------------------- \n'
 
-    for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm)): smooth_write(sky[i,...],out,freq,fwhm)
+    for i,(freq,fwhm) in enumerate(zip(out.output_frequency,out.fwhm)): smooth_write(sky[i,...],out,freq,fwhm,Config)
     
     print '-----------------------------------------------------\n'
     print 'PySM completed successfully. \n' 

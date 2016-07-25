@@ -3,6 +3,7 @@ import scipy as sp
 import healpy as hp, sys, time
 from scipy.misc import factorial, comb
 from scipy.interpolate import interp1d
+import os
 
 constants = {
     'T_CMB':2.7255,
@@ -28,6 +29,18 @@ def condense_list(models):
     mod_names =[f[1] for f in models]
     return [(f[0],' '.join(mod_names))]
 
+def file_path(o,freq):
+    comps = str()
+    for i in sorted(o.components): comps='_'.join([comps,i[0:5]])
+    fname = ''.join([o.output_prefix,comps, str(freq).replace('.', 'p'),'_', str(o.nside), '.fits'])
+    path = os.path.join(o.output_dir, fname)
+    return path
+
+def smooth_write(sky_freq,o,freq,fwhm,Config):
+    if o.smoothing:
+        sky_freq = hp.smoothing(sky_freq,fwhm=(np.pi/180.)*fwhm,verbose=False)
+    path = file_path(o,freq)
+    hp.write_map(path, hp.ud_grade(sky_freq, nside_out=o.nside), coord='G', column_units = ''.join(o.output_units), column_names = None, extra_header = config2list(Config))
 
 def config2list(config):
     info = []
@@ -153,9 +166,9 @@ def scale_freqs(c, o, pol=None, samples=10.):
     
      freq = np.asarray(np.copy(o.output_frequency))
 
-     if not pol: 
+     if pol == False: 
          freq_ref = np.copy(c.freq_ref)
-     else: 
+     if pol == True: 
          freq_ref = np.copy(c.pol_freq_ref)
 
      if o.bandpass: 
