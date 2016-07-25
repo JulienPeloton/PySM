@@ -67,7 +67,7 @@ class component(object):
             self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
             if self.compute_lensed_cmb == False: self.lensed_cmb = read_map_wrapped(cdict['lensed_cmb'],nside_out,field=(0,1,2))
         if 'emissivity' in keys:
-            self.emissivity = np.load(cdict['emissivity'])
+            self.emissivity = np.loadtxt(cdict['emissivity'],unpack=True)
         if 'freq_peak' in keys:
             try: self.freq_peak = float(cdict['freq_peak'])
             except ValueError: self.freq_peak = read_map_wrapped(cdict['freq_peak'],nside_out)
@@ -129,10 +129,12 @@ def scale_freqs(c, o, pol=None, samples=10.):
     
      freq = np.asarray(np.copy(o.output_frequency))
 
-     if pol == False: freq_ref = np.copy(c.freq_ref)
-     if pol == True: freq_ref = np.copy(c.pol_freq_ref)
+     if not pol: 
+         freq_ref = np.copy(c.freq_ref)
+     else: 
+         freq_ref = np.copy(c.pol_freq_ref)
 
-     if o.bandpass == True: 
+     if o.bandpass: 
          widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in o.bandpass_widths])
          freq = freq[...,np.newaxis]+widths
          freq_cen = np.asarray(o.output_frequency) 
@@ -142,20 +144,26 @@ def scale_freqs(c, o, pol=None, samples=10.):
 #Note that the bandpass has to be done in non-thermodynamic units, so there are factors of frequency squared inside and outside the integral to account for switching between the two unit systems.
 
      if c.spectral_model=="curvedpowerlaw": 
-         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))
-         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve)),axis=np.ndim(freq)-1)/samples
+         if not o.bandpass: 
+             return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve))
+         else: 
+             return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**(c.beta_template+c.beta_curve*np.log(freq[...,np.newaxis]/c.freq_curve)),axis=np.ndim(freq)-1)/samples
 
 
      if c.spectral_model=="powerlaw": 
-         if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**c.beta_template
-         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**c.beta_template,axis=np.ndim(freq)-1)/samples
+         if not o.bandpass: 
+             return (freq[...,np.newaxis]/freq_ref)**c.beta_template
+         else: 
+             return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**c.beta_template,axis=np.ndim(freq)-1)/samples
 
 
      if c.spectral_model=="thermaldust":
         exponent=(constants['h']/constants['k_B'])*(freq[...,np.newaxis]*1.e9/c.temp_template)
         exponent_ref=(constants['h']/constants['k_B'])*(freq_ref*1.e9/c.temp_template)
-        if o.bandpass == False: return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
-        else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(c.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
+        if not o.bandpass: 
+            return (freq[...,np.newaxis]/freq_ref)**(c.beta_template+1)*((np.exp(exponent_ref)-1.)/(np.exp(exponent)-1.))
+        else: 
+            return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*(freq[...,np.newaxis]/freq_ref)**(c.beta_template+1) * ( (np.exp(exponent_ref)-1.) / (np.exp(exponent)-1.) ) , axis=np.ndim(freq)-1 ) / samples
 
 
      if  c.spectral_model=="cmb":
@@ -163,20 +171,21 @@ def scale_freqs(c, o, pol=None, samples=10.):
          else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*convert_units(['u','K_CMB'],o.output_units,freq)[...,np.newaxis], axis=np.ndim(freq)-1 ) / samples
 
      if c.spectral_model=="spdustnum":
-         arg1 = freq[...,np.newaxis]*c.peak_ref/c.freq_peak
-         arg1[arg1>np.max(c.emissivity[0,:])] = 0  #disregard elements where emissivity is zero.
-         arg1[arg1<np.min(c.emissivity[0,:])] = 0
-         arg2 = c.freq_ref*c.peak_ref/c.freq_peak
-         f = interp1d(c.emissivity[0,:],c.emissivity[1,:],kind='cubic')
-         ind = np.where(arg1>0)
-         arg1[ind] = f(arg1[ind])
 
-         if o.bandpass == False: return ((c.freq_ref/freq)**2)[...,np.newaxis]*(arg1/f(arg2))
-         else: return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis] * (arg1/f(arg2)), axis=np.ndim(freq)-1 ) / samples
+         J = interp1d(c.emissivity[0],c.emissivity[1],bounds_error=False,fill_value=0)
+         arg1 = freq[...,np.newaxis]*c.peak_ref/c.freq_peak
+         arg2 = c.freq_ref*c.peak_ref/c.freq_peak
+
+         if not o.bandpass: 
+             return ((c.freq_ref/freq)**2)[...,np.newaxis]*(J(arg1)/J(arg2))
+         else: 
+             return (1./freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis] * (J(arg1)/J(arg2)), axis=np.ndim(freq)-1 ) / samples
 
      if c.spectral_model=="freefree":
-         if o.bandpass == False: return (freq[...,np.newaxis]/c.freq_ref)**-2.14
-         else: return (1/freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**-2.14, axis=np.ndim(freq)-1 ) / samples
+         if not o.bandpass: 
+             return (freq[...,np.newaxis]/c.freq_ref)**-2.14
+         else: 
+             return (1/freq_cen**2)[...,np.newaxis]*np.sum((freq**2)[...,np.newaxis]*((c.freq_ref/freq)**2)[...,np.newaxis]*(freq[...,np.newaxis]/c.freq_ref)**-2.14, axis=np.ndim(freq)-1 ) / samples
 
      else:
         print('No law selected')
