@@ -74,7 +74,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  353 GHz in polarisation from the Planck-2015 analysis, and scale these to different
  frequencies with a mbb spectrum using the spatially varying temperature and spectral
  index obtained from the Planck data using the Commander code (Planck Collaboration
- 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for
+ 2015, [arXiv:1502.01588](https://arxiv.org/abs/1502.01588)). Note that it therefore assumes the same spectral index for
  polarization as for intensity.  The input intensity template at 545 GHz is simply the
  available 2048 product degraded to nside 512.  The polarization templates have been
  smoothed with a Gaussian kernel of FWHM 2.6 degrees, and had small scales added via
@@ -100,7 +100,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  is defined by a degree-scale emission template at a reference frequency and a peak frequency
  of the emission law. Both populations have a spatially varying emission template, one
  population has a spatially varying peak frequency, and the other population has a
- spatially constant peak frequency.  The emission law is generated using the SpDust2 code
+ spatially constant peak frequency.  The emission law is generated using the [SpDust2](http://www.pha.jhu.edu/~yalihai1/spdust/spdust.html) code
  [(Ali-Haimoud 2008)](http://arxiv.org/abs/0812.2904). The nominal model is unpolarized. We
  add small scales to the emission maps, the method is outlined in the accompanying paper.
 
