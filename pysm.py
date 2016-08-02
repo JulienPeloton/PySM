@@ -32,7 +32,7 @@ def condense_list(models):
 def file_path(o,j):
     comps = str()
     for k in sorted(o.components): 
-        comps='_'.join([comps,k[0:5]])
+        comps=''.join([comps,k[0:5],'_'])
     fname = ''.join([o.output_prefix,comps, str(o.output_frequency[j]).replace('.', 'p'),'_', str(o.nside), '.fits'])
     path = os.path.join(o.output_dir, fname)
     return path
