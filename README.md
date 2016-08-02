@@ -63,7 +63,7 @@ summed emission of all the chosen components. The default output directory is '.
 To change the parameters of the simulation edit the 'main_config.ini' file (or
 create a separate configuration file). The different parameters are described
 in the comments of this ini file as well as the individual model config files
-in './ConfigFiles/< model >_config.ini'.
+in './ConfigFiles/\<model_name\>_config.ini'.
 
 --------------------------------------------------------------------------
 ## Models
