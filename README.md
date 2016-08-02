@@ -21,16 +21,19 @@ for each component.
 
 Currently much of the available data is limited in resolution at degree-scale.  We therefore
 make efforts to provide reasonable small-scale simulations to extend the data to higher
-multipoles.  The details of the procedures developed can be found in the accompanying paper.
+multipoles. The details of the procedures developed can be found in the accompanying paper.
+Note that, even if you request maps with a resolution parameter Nside larger than the
+default resolution of the nominal PySM templates (Nside=512), the output maps will only
+contain power up to this default resolution.
 
 This code is based on the large-scale Galactic part of Planck Sky Model code and uses
 some of its inputs (http://www.apc.univ-paris7.fr/~delabrou/PSM/psm.html,
-astro-ph/1207.3675).
+[astro-ph/1207.3675](http://arxiv.org/abs/1207.3675)).
 
 -----------------------------------------------------------------------
 
 ### Dependencies:
-This code uses python, and needs the healpy, numpy, scipy and astropy libraries.
+This code uses python, and needs the healpy, numpy, scipy and astropy modules.
 Versions of those that it is known to work with are:
 
     - python 2.7.6
@@ -60,7 +63,7 @@ summed emission of all the chosen components. The default output directory is '.
 To change the parameters of the simulation edit the 'main_config.ini' file (or
 create a separate configuration file). The different parameters are described
 in the comments of this ini file as well as the individual model config files
-in './ConfigFiles/<model>_config.ini'.
+in './ConfigFiles/< model >_config.ini'.
 
 --------------------------------------------------------------------------
 ## Models
