@@ -126,7 +126,7 @@ amount of variation consistent with Planck.
 
 **'dust4'** = a generalization of model 1 to multiple dust populations.  It has been found that
 a two component model is still a good fit to the Planck data.  This option uses the two
-component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999,Astrophysical Journal,
+component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999, Astrophysical Journal,
 524, 867.
 
 **'synchrotron2'** = synchrotron index steepens off the Galactic plane, from -3.0 in the
