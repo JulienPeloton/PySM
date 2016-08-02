@@ -86,7 +86,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  23 GHz Q/U maps (Bennett, C.L., et.al., 2014, ApJS, 208, 20B). The polarization maps
  have been smoothed with a Gaussian kernel of FWHM 5 degrees and had small scales added.
  The intensity template has had small scales added straight to the template. The
- details of the small scale procedure is outlined in the accompanying paper.
+ details of the small scale procedure are outlined in the accompanying paper.
  The spectral index map was derived using a combination of the Haslam 408 MHz data and WMAP 23
  GHz 7-year data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling
  is used for intensity and polarization.  This is the same prescription as used in the
@@ -96,7 +96,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  curvature is taken from Kogut, A. 2012, ApJ, 753, 110.
  
  **'spdust1'** = Spinning Dust: We model the AME as a sum of two spinning dust populations
- based on the Commander code (Planck Collaboration 2015, arXiv:1502.01588). A component
+ based on the Commander code (Planck Collaboration 2015, [arXiv:1502.01588](https://arxiv.org/abs/1502.01588)). A component
  is defined by a degree-scale emission template at a reference frequency and a peak frequency
  of the emission law. Both populations have a spatially varying emission template, one
  population has a spatially varying peak frequency, and the other population has a
