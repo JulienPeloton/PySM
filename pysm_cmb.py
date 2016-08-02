@@ -15,13 +15,13 @@ def main(fname_config):
 
 	print 'Computing CMB maps.'
 	print '----------------------------------------------------- \n'
-	if out.debug == True:
+	if out.debug:
 		print ''.join("%s: %s \n" % item   for item in vars(CMB).items())
 		print '----------------------------------------------------- \n'
 #This code is edited from taylens code: Naess, S. K. and Louis, T. 2013 'Lensing simulations by Taylor expansion - not so inefficient after all'  Journal of Cosmology and Astroparticle Physics September 2013
 #Available at: https://github.com/amaurea/taylens
 	
-	if CMB.compute_lensed_cmb == True:
+	if CMB.compute_lensed_cmb:
 		
 		print('Using taylens to compute temperature map.')
 		print '----------------------------------------------------- \n'
@@ -41,7 +41,7 @@ def main(fname_config):
                 cl_tebp_arr[5,:] =np.zeros(lmax_cl+1)                    #EB
 		cl_tebp_arr[7,:] =np.zeros(lmax_cl+1)                    #TB
 
-		if CMB.delens == True:
+		if CMB.delens:
 
 			cl_tebp_arr[3,2:]=2*np.pi*data[5]*CMB.delensing_ells[1]/(l[2:]*(l[2:]+1))**2   #PP
 			cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
@@ -52,11 +52,6 @@ def main(fname_config):
 			cl_tebp_arr[6,:] =np.zeros(lmax_cl+1)                    #BP
 			cl_tebp_arr[8,2:]=2*np.pi*data[7]/(l[2:]*(l[2:]+1))**1.5 #EP
 			cl_tebp_arr[9,2:]=2*np.pi*data[6]/(l[2:]*(l[2:]+1))**1.5 #TP
-
-		cl_tebp_arr[4,2:]=2*np.pi*data[4]/(l[2:]*(l[2:]+1))      #TE
-		cl_tebp_arr[5,:] =np.zeros(lmax_cl+1)                    #EB
-		cl_tebp_arr[7,:] =np.zeros(lmax_cl+1)                    #TB
-
 
 # Coordinates of healpix pixel centers
 		ipos = np.array(hp.pix2ang(out.nside, np.arange(12*(out.nside**2))))
