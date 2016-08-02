@@ -48,7 +48,7 @@ def config2list(config,o,i):
 
     exclude = ['__name__','output_frequency','instrument_noise',
                'instrument_noise_i','instrument_noise_pol','smoothing',
-               'fwhm','bandpass','bandpass_widths','instrument_noise_seed']
+               'fwhm','bandpass','bandpass_widths','instrument_noise_seed','output_dir']
 
     for f in config.sections(): 
         info += config._sections[f].items()
@@ -197,9 +197,12 @@ def scale_freqs(c, o, pol=None, samples=10.):
          freq_ref = np.copy(c.pol_freq_ref)
 
      if o.bandpass: 
+
          widths = np.asarray([np.linspace(-(samples-1.)*w/(samples*2.),(samples-1)*w/(samples*2.),num=samples) for w in o.bandpass_widths])
          freq = freq[...,np.newaxis]+widths
-         freq_cen = np.asarray(o.output_frequency) 
+         freq_cen = np.asarray(np.copy(o.output_frequency))
+
+
 
 #Note that the frequencies within a bandwidth are stored in the second dimension of the frequency array.  When we sum over the final produce of each power law we therefore specify the ndim(freq)-1 dimension. Freq has two dimensions at this point and so ndim(freq)-1 = 1.  Axis indexing starts at 0. So this gives us the correct summation.
 
