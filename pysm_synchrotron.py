@@ -3,21 +3,12 @@ import healpy as hp
 from pysm import scale_freqs, convert_units, component, output
 import ConfigParser
 
-def main(fname_config):
+def scale_synch_pop(i_pop,npop,out,Config) :
 
-#Read in configuration file to classes.
-	Config = ConfigParser.ConfigParser()
-	Config.read(fname_config)
-	out = output(Config._sections['GlobalParameters'])
-
-	a=Config.read('./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini')
-	if a==[] :
-		print 'Couldn\'t find file'+' ./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini'
-		exit(1)
-	synch = component(Config._sections['Synchrotron'],out.nside)
-	with open(out.output_dir+out.output_prefix+'synchrotron_config.ini','w') as configfile: Config.write(configfile)
-
-	print('Computing synchrotron maps.')
+	if npop==1 : secname='Synchrotron'
+	else : secname='Synchrotron_%d'%i_pop
+	synch = component(Config._sections[secname],out.nside)
+	print('Computing synchrotron maps (%d-th component).'%i_pop)
 	print '----------------------------------------------------- \n'
 	if out.debug == True:
 		print ''.join("%s: %s \n" % item   for item in vars(synch).items())
@@ -46,6 +37,31 @@ def main(fname_config):
 	if out.debug == True:
 		syn = np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
 		for i in range(0,len(out.output_frequency)):
-			hp.write_map(out.output_dir+out.output_prefix+'synch_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',syn[:,i,:],coord='G',column_units=out.output_units)
+			hp.write_map(out.output_dir+out.output_prefix+'synch%d'%i_pop+'_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',syn[:,i,:],coord='G',column_units=out.output_units)
 
 	return np.concatenate([scaled_map_synch[np.newaxis,...],scaled_map_synch_pol])
+
+def main(fname_config):
+
+#Read in configuration file to classes.
+	Config = ConfigParser.ConfigParser()
+	Config_model = ConfigParser.ConfigParser()
+
+	Config.read(fname_config)
+	out = output(Config._sections['GlobalParameters'])
+
+	a=Config_model.read('./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini')
+	if a==[] :
+		print 'Couldn\'t find file'+' ./ConfigFiles/'+Config.get('Synchrotron','model')+'_config.ini'
+		exit(1)
+	
+	npops = len(Config_model.sections())
+		
+	with open(out.output_dir+out.output_prefix+'synchrotron_config.ini','w') as configfile: Config_model.write(configfile)
+	
+	synch_out = 0.
+	
+	for i_pop in np.arange(npops)+1 :
+		synch_out += scale_synch_pop(i_pop,npops,out,Config_model)
+
+	return synch_out

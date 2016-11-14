@@ -3,9 +3,11 @@ import healpy as hp
 import ConfigParser
 from pysm import scale_freqs, convert_units, output, component
 
-def scale_dust_pop(pop,i_pop,out,Config):
+def scale_dust_pop(i_pop,npop,out,Config):
 
-	dust = component(Config._sections[pop],out.nside)
+	if npop==1 : secname='ThermalDust'
+	else : secname='ThermalDust_%d'%i_pop
+	dust = component(Config._sections[secname],out.nside)
 	print('Computing dust maps (%d-th component)'%i_pop)
 	print '----------------------------------------------------- \n'
 	if out.debug == True: 
@@ -42,16 +44,14 @@ def main(fname_config):
 	if a==[] :
 		print 'Couldn\'t find file '+'./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini'
 		exit(1)
-	pops = Config_model.sections()
+	npops = len(Config_model.sections())
 
 	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config_model.write(configfile)
 
 	dust_out = 0.
 
-	i_pop=1
-	for p in pops: 
-		dust_out += scale_dust_pop(p,i_pop,out,Config_model)
-		i_pop+=1
+	for i_pop in np.arange(npops)+1 : 
+		dust_out += scale_dust_pop(i_pop,npops,out,Config_model)
 
 	return dust_out
 
