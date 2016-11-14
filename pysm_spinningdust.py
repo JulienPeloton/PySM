@@ -11,7 +11,10 @@ def main(fname_config):
     Config.read(fname_config)
     out = output(Config._sections['GlobalParameters'])
 
-    Config.read('./ConfigFiles/'+Config.get('SpinningDust','model')+'_config.ini')
+    a=Config.read('./ConfigFiles/'+Config.get('SpinningDust','model')+'_config.ini')
+    if a==[] :
+        print 'Couldn\'t find file '+'./ConfigFiles/'+Config.get('SpinningDust','model')+'_config.ini'
+        exit(1)
     spdust_general = component(Config._sections['General'],out.nside)
     spdust1 = component(Config._sections['SpinningDust1'],out.nside)
     spdust2 = component(Config._sections['SpinningDust2'],out.nside)
@@ -40,6 +43,6 @@ def main(fname_config):
 
     if out.debug == True:
         for i in range(0,len(out.output_frequency)):
-            hp.write_map(out.output_dir+'spdust_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
+            hp.write_map(out.output_dir+out.output_prefix+'spdust_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
 
     return np.concatenate([scaled_map_spdust[np.newaxis,...],scaled_map_spdust_pol])

@@ -3,10 +3,10 @@ import healpy as hp
 import ConfigParser
 from pysm import scale_freqs, convert_units, output, component
 
-def scale_dust_pop(pop,out,Config):
+def scale_dust_pop(pop,i_pop,out,Config):
 
 	dust = component(Config._sections[pop],out.nside)
-	print('Computing dust maps.')
+	print('Computing dust maps (%d-th component)'%i_pop)
 	print '----------------------------------------------------- \n'
 	if out.debug == True: 
 		print ''.join("%s: %s \n" % item   for item in vars(dust).items())
@@ -25,7 +25,7 @@ def scale_dust_pop(pop,out,Config):
 	if out.debug == True:
                 dus = np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
                 for i in range(0,len(out.output_frequency)):
-                        hp.write_map(out.output_dir+out.output_prefix+'dust_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',dus[:,i,:],coord='G',column_units=out.output_units)
+                        hp.write_map(out.output_dir+out.output_prefix+'dust%d'%i_pop+'_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',dus[:,i,:],coord='G',column_units=out.output_units)
 
 	return np.concatenate([scaled_map_dust[np.newaxis,...],scaled_map_dust_pol])
 
@@ -38,15 +38,20 @@ def main(fname_config):
 	Config.read(fname_config)
 	out = output(Config._sections['GlobalParameters'])
 
-	Config_model.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
+	a=Config_model.read('./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini')
+	if a==[] :
+		print 'Couldn\'t find file '+'./ConfigFiles/'+Config.get('ThermalDust','model')+'_config.ini'
+		exit(1)
 	pops = Config_model.sections()
 
 	with open(out.output_dir+out.output_prefix+'thermaldust_config.ini','w') as configfile: Config_model.write(configfile)
 
 	dust_out = 0.
 
+	i_pop=1
 	for p in pops: 
-		dust_out += scale_dust_pop(p,out,Config_model)
+		dust_out += scale_dust_pop(p,i_pop,out,Config_model)
+		i_pop+=1
 
 	return dust_out
 
