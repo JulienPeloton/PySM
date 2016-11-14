@@ -7,7 +7,13 @@
 - Nside of different templates [\#2](https://github.com/bthorne93/PySM/issues/2)
 
 - Changed curved synchrotron power law option to follow Kogut 2012 curvature model. (29.6.16)
-- Change free-free emission to be a -2.17 power law rather than analytical for from Commander. (29.6.16)  
+- Change free-free emission to be a -2.14 power law rather than analytical for from Commander. (29.6.16)  
+
+- Added all final small scale maps. (21.7.16)
+- Added a gitignore. (21.7.16)
+- Corrected a bug in free-free scaling. (21.7.16)
+- Made pysm.py slightly more readable.  (24.7.16)
+- AME scaling function in pysm.py made more readable. (24.7.16)
 
 **Merged pull requests:**
 
