@@ -1,12 +1,12 @@
 # PySM: Python Sky Model  v-1.0
-Most recent version available on [GitHub](https://github.com/bthorne93/PySM)
+Most recent version available on [GitHub](https://github.com/bthorne93/PySM_public)
 
 **Authors**: Ben Thorne, David Alonso, Sigurd Naess, Jo Dunkley 
 
 **Contact**: ben.thorne@physics.ox.ac.uk
 
 If you use the code for any publications, please acknowledge it and cite:
-[Thorne et al 2016, arxiv:XXXXX](paper url)
+[Thorne et al 2016, arxiv: 1608.02841](http://arxiv.org/abs/1608.02841)
 
 ------------------------------------------------------------------------
 ### Outline:
@@ -21,10 +21,7 @@ for each component.
 
 Currently much of the available data is limited in resolution at degree-scale.  We therefore
 make efforts to provide reasonable small-scale simulations to extend the data to higher
-multipoles. The details of the procedures developed can be found in the accompanying paper.
-Note that, even if you request maps with a resolution parameter Nside larger than the
-default resolution of the nominal PySM templates (Nside=512), the output maps will only
-contain power up to this default resolution.
+multipoles.  The details of the procedures developed can be found in the accompanying paper.
 
 This code is based on the large-scale Galactic part of Planck Sky Model code and uses
 some of its inputs (http://www.apc.univ-paris7.fr/~delabrou/PSM/psm.html,
@@ -63,7 +60,7 @@ summed emission of all the chosen components. The default output directory is '.
 To change the parameters of the simulation edit the 'main_config.ini' file (or
 create a separate configuration file). The different parameters are described
 in the comments of this ini file as well as the individual model config files
-in './ConfigFiles/\<model_name\>_config.ini'.
+in './ConfigFiles/<model>_config.ini'.
 
 --------------------------------------------------------------------------
 ## Models
@@ -74,7 +71,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  353 GHz in polarisation from the Planck-2015 analysis, and scale these to different
  frequencies with a mbb spectrum using the spatially varying temperature and spectral
  index obtained from the Planck data using the Commander code (Planck Collaboration
- 2015, [arXiv:1502.01588](https://arxiv.org/abs/1502.01588)). Note that it therefore assumes the same spectral index for
+ 2015, arXiv:1502.01588). Note that it therefore assumes the same spectral index for
  polarization as for intensity.  The input intensity template at 545 GHz is simply the
  available 2048 product degraded to nside 512.  The polarization templates have been
  smoothed with a Gaussian kernel of FWHM 2.6 degrees, and had small scales added via
@@ -86,7 +83,7 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  23 GHz Q/U maps (Bennett, C.L., et.al., 2014, ApJS, 208, 20B). The polarization maps
  have been smoothed with a Gaussian kernel of FWHM 5 degrees and had small scales added.
  The intensity template has had small scales added straight to the template. The
- details of the small scale procedure are outlined in the accompanying paper.
+ details of the small scale procedure is outlined in the accompanying paper.
  The spectral index map was derived using a combination of the Haslam 408 MHz data and WMAP 23
  GHz 7-year data (Miville-Deschenes, M.-A. et al., 2008, A&A, 490, 1093). The same scaling
  is used for intensity and polarization.  This is the same prescription as used in the
@@ -96,11 +93,11 @@ in './ConfigFiles/\<model_name\>_config.ini'.
  curvature is taken from Kogut, A. 2012, ApJ, 753, 110.
  
  **'spdust1'** = Spinning Dust: We model the AME as a sum of two spinning dust populations
- based on the Commander code (Planck Collaboration 2015, [arXiv:1502.01588](https://arxiv.org/abs/1502.01588)). A component
+ based on the Commander code (Planck Collaboration 2015, arXiv:1502.01588). A component
  is defined by a degree-scale emission template at a reference frequency and a peak frequency
  of the emission law. Both populations have a spatially varying emission template, one
  population has a spatially varying peak frequency, and the other population has a
- spatially constant peak frequency.  The emission law is generated using the [SpDust2](http://www.pha.jhu.edu/~yalihai1/spdust/spdust.html) code
+ spatially constant peak frequency.  The emission law is generated using the SpDust2 code
  [(Ali-Haimoud 2008)](http://arxiv.org/abs/0812.2904). The nominal model is unpolarized. We
  add small scales to the emission maps, the method is outlined in the accompanying paper.
 
@@ -126,7 +123,7 @@ amount of variation consistent with Planck.
 
 **'dust4'** = a generalization of model 1 to multiple dust populations.  It has been found that
 a two component model is still a good fit to the Planck data.  This option uses the two
-component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999, Astrophysical Journal,
+component model from Finkbeiner, D. P., Davis, M., & Schlegel, D. J. 1999,Astrophysical Journal,
 524, 867.
 
 **'synchrotron2'** = synchrotron index steepens off the Galactic plane, from -3.0 in the
