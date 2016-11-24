@@ -144,6 +144,19 @@ class component(object):
             self.em = read_map_wrapped(cdict['ff_em_temp'],nside_out)
         if 'ff_te_temp' in keys:
             self.te = read_map_wrapped(cdict['ff_te_temp'],nside_out)
+        if 'freq_decorrelation' in keys:
+            self.freq_decorrelation = 'True' in cdict['freq_decorrelation']
+        if 'xi' in keys:
+            try: 
+                self.xi = float(cdict['xi'])
+            except ValueError:
+                self.xi_ell, self.xi = np.loadtxt(os.path.abspath(cdict['xi']), unpack = True)
+        if 'lmax' in keys:
+            try:
+                self.lmax = int(cdict['lmax'])
+            except ValueError:
+                self.lmax = None
+            
             
 class output(object):
     def __init__(self, config_dict):
@@ -169,7 +182,6 @@ class output(object):
         self.smoothing = 'True' in config_dict['smoothing']
         self.fwhm = [float(i) for i in config_dict['fwhm'].split()]
 
-
 def convert_units(u_from, u_to, freq): #freq in GHz
 
     if u_from[0] not in units.keys():
@@ -180,8 +192,160 @@ def convert_units(u_from, u_to, freq): #freq in GHz
         if u_to[0] not in units.keys(): return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/units[u_to[0]+u_to[1]](np.asarray(freq))
         else: return units[u_from[0]]*units[u_from[1]](np.asarray(freq))/(units[u_to[0]]*units[u_to[1]](np.asarray(freq)))
 
+def R_model(C_ell, xi):
+    """
+    Returns the spectrum C_ell as a function
+    of field and frequency. X = 'EE, BB, EB'.
+    """
+    def R(X, nu1, nu2):
+        nu1 = float(nu1)
+        nu2 = float(nu2)
+        exponent = - 0.5 * np.log(nu1 / nu2) ** 2 / xi ** 2
+        return C_ell[X] * np.exp(exponent)
+    return R
 
+def freq_decorr(dust, out):
+    """
+    Check if lmax has been set, if not 
+    use default.
+    Check correct length of xi array.
+    """
+    if dust.lmax == None:
+        dust.lmax = int(3. * out.nside - 1)
 
+    if not isinstance(dust.xi, float):
+        if not dust.xi.size == dust.lmax + 1:
+            print 'Xi array is of incorrect size for this lmax.'
+            exit()
+        if not dust.xi_ell[0] == 0.:
+            print 'Xi array does not start at ell = 0.'
+            exit()
+
+    """
+    Get constraining spectra from polarization templates.
+    """
+    base_maps = np.array([np.zeros(hp.nside2npix(out.nside)), dust.polq_em_template, dust.polu_em_template])
+    C_ell = {}
+    _, C_ell['EE'], C_ell['BB'], _, C_ell['EB'], _ = hp.anafast(base_maps, lmax = dust.lmax)
+    alm_dust = hp.map2alm(base_maps, lmax = dust.lmax, pol = True)
+    for c in C_ell.values():
+        c += 1e-20
+
+    """
+    Convert alm_dust to convenient indexing for calculation -> alm_const
+    N.B. Assuming mmax = lmax for now.
+    """
+    dust.mmax = np.copy(dust.lmax)
+    alm_const = np.zeros((2, dust.lmax + 1, dust.mmax + 1), dtype = 'complex')
+    i = 0
+    for m in xrange(dust.mmax + 1):
+        for l in xrange(m, dust.lmax + 1):
+            alm_const[0, l, m] = alm_dust[1][i]
+            alm_const[1, l, m] = alm_dust[2][i]
+            i += 1
+
+    """
+    Insert constraining frequency at beginning of array.
+    Exception added for when constraint frequency is in list. 
+    In this case it is moved to the beginning. 
+    """
+    if dust.pol_freq_ref in out.output_frequency:
+        freqs = list(out.output_frequency)
+        freqs.insert(0, freqs.pop(freqs.index(dust.pol_freq_ref)))
+        freqs = np.array(freqs)
+    else:
+        freqs = np.insert(out.output_frequency, 0, dust.pol_freq_ref)
+    nfreqs = len(freqs)
+
+    """
+    Calculate the covariance structure we 
+    are enforcing for E and B fields at each 
+    frequency. 
+    R = (EE_nu1nu1, EE_nu1nu2 .. EB_nu1nu1 ...
+         EE_nu2nu1, EE_nu2nu2 ..              
+         ...      ,              BB_nu1nu1 ... ) 
+    """
+    R_matrix = R_model(C_ell, dust.xi)
+    R = np.zeros((nfreqs * 2, nfreqs * 2, dust.lmax + 1), dtype = np.float32)
+
+    for a, n1 in enumerate(freqs):
+        for b, n2 in enumerate(freqs):
+            R[a         , b         ] = R_matrix('EE', n1, n2) 
+            R[a + nfreqs, b         ] = R_matrix('EB', n1, n2)
+            R[a         , b + nfreqs] = R_matrix('EB', n1, n2) 
+            R[a + nfreqs, b + nfreqs] = R_matrix('BB', n1, n2)
+            R[a, a] += 1e-18
+
+    """
+    Generate vector of random variables x_lm. Note that 
+    this currently has more elements than necessary
+    as it uses a convenient indexing c.f. hpix
+    Have just found out about healpy.sphtfunc.Alm.getidx. 
+    Switching to this should be faster and clearer.
+    """
+    np.random.seed(1234)
+
+    xlm = np.zeros(((nfreqs - 1) * 2, dust.lmax + 1, dust.mmax + 1), dtype = 'complex')
+
+    for n in xrange((nfreqs - 1) * 2):
+        for m in xrange(dust.mmax + 1):
+            for l in xrange(m, dust.lmax + 1):
+                if l == 0:
+                    xlm[n, l, m] = np.random.normal()
+                else:
+                    xlm[n, l, m] = 1. / np.sqrt(2.) * (np.random.normal() + 1j * np.random.normal())
+
+    """
+    Calculate the constrained realizations at each l -> ylms.
+    Need to add exception for xi = constant when R needs only
+    to be inverted once. 
+    """
+    ylms = np.zeros(( (nfreqs - 1) * 2, dust.lmax + 1, dust.mmax + 1), dtype = 'complex')
+
+    for l in xrange(dust.lmax + 1):
+        R_inv = np.linalg.inv(R[:, :, l])
+
+        R_inv_uc = np.delete(R_inv[0:, [0, nfreqs]], [0, nfreqs], 0)
+        R_inv_uu = np.delete(np.delete(R_inv, [0, nfreqs], 0),
+                                              [0, nfreqs], 1)
+
+        R_uu = np.linalg.inv(R_inv_uu)
+        L_uu = np.linalg.cholesky(R_uu)
+
+        for m in xrange(dust.mmax + 1):
+            ylms[:, l, m] = np.dot(L_uu, xlm[:, l, m]) - np.dot(np.dot(R_uu, R_inv_uc), 
+                                                            alm_const[:,l, m])
+
+    """
+    Convert ylms to hpix ordering -> alms.
+    """
+    DOF = int((dust.lmax + 1.) * (dust.lmax / 2. + 1.))
+    alms = np.zeros((nfreqs - 1, 3, DOF), dtype = 'complex')
+
+    for n in xrange(nfreqs - 1):
+        i = 0
+        for m in xrange(dust.mmax + 1):
+            for l in xrange(m, dust.lmax + 1):
+                alms[n, 0, i] = np.zeros(ylms[n, l, m].shape) #temp = 0
+                alms[n, 1, i] = ylms[n         ,      l, m]
+                alms[n, 2, i] = ylms[n + (nfreqs -1), l, m]
+                i += 1
+    
+    """
+    Produce final maps. Take only Q, U.
+    """
+    decorr_maps = [hp.alm2map([a[0], a[1], a[2]], nside = out.nside, pol = True, verbose = False) for a in alms]
+        
+    """
+    Add constraining maps back in the case that this 
+    freuency is in the output list. 
+    Return only the Q and U maps.
+    """
+    if dust.pol_freq_ref in out.output_frequency:
+        decorr_maps.insert(out.output_frequency.index(dust.pol_freq_ref), base_maps)
+    decorr_maps = np.array([np.array([d[1], d[2]]) for d in decorr_maps])
+
+    return decorr_maps
 
 def scale_freqs(c, o, pol=None, samples=10.):
 
