@@ -108,6 +108,10 @@ class component(object):
             self.polq_em_template = read_map_wrapped(cdict['polq_em_template'],nside_out)
         if 'polu_em_template' in keys:
             self.polu_em_template = read_map_wrapped(cdict['polu_em_template'],nside_out)
+        if 'corr_len' in keys:
+            self.corr_len = float(cdict['corr_len'])
+        else :
+            self.corr_len=-1
         if 'freq_ref' in keys:
             self.freq_ref = float(cdict['freq_ref'])
         if 'pol_freq_ref' in keys:
@@ -425,3 +429,75 @@ def tprint(msg):
         if t0 is None: t0 = time.time()
         print >> sys.stderr, "%8.2f %s" % (time.time()-t0,msg)
 
+
+def get_decorrelation_matrices(freqs,freq_ref,corrlen) :
+    if corrlen<=0 :
+        rho_mean=np.ones([len(freqs),1])
+        rho_covar=np.zeros([len(freqs),len(freqs)])
+    else :
+        added_freq=False
+        freqtot=np.array([f for f in freqs])
+        if not(freq_ref in freqtot) :
+            freqtot=np.insert(freqtot,0,freq_ref)
+            added_freq=True
+        indref=np.where(freqtot==freq_ref)[0][0]
+
+        def invert_safe(m) :
+            w,v=np.linalg.eigh(m); winv=1./w;
+            return np.dot(v,np.dot(np.diag(winv),np.transpose(v)))
+        corrmatrix=np.exp(-0.5*((np.log(freqtot[:,None])-np.log(freqtot[None,:]))/corrlen)**2)
+        corrmatrix+=np.diag(1E-16*np.ones_like(freqtot));
+        rho_inv=invert_safe(corrmatrix)
+        rho_uu=np.delete(np.delete(rho_inv,indref,axis=0),indref,axis=1);
+        rho_uu=invert_safe(rho_uu)
+        rho_inv_cu=rho_inv[:,indref]; rho_inv_cu=np.transpose(np.array([np.delete(rho_inv_cu,indref)]))
+        rho_uu_w,rho_uu_v=np.linalg.eig(rho_uu)
+
+        rho_covar=np.dot(rho_uu_v,np.dot(np.diag(np.sqrt(np.maximum(np.zeros_like(rho_uu_w),rho_uu_w))),np.transpose(rho_uu_v)))
+        rho_mean=-np.dot(rho_uu,rho_inv_cu)
+		
+        if not added_freq :
+            rho_covar_new=np.zeros([len(freqtot),len(freqtot)])
+            rho_mean_new=np.ones([len(freqtot),1])
+            rho_covar_new[:indref  ,:indref  ]=rho_covar[:indref,:indref]
+            rho_covar_new[indref+1:,:indref  ]=rho_covar[indref:,:indref]
+            rho_covar_new[:indref  ,indref+1:]=rho_covar[:indref,indref:]
+            rho_covar_new[indref+1:,indref+1:]=rho_covar[indref:,indref:]
+            rho_covar=rho_covar_new
+            rho_mean_new[:indref,:]=rho_mean[:indref,:]
+            rho_mean_new[indref+1:,:]=rho_mean[indref:,:]
+            rho_mean=rho_mean_new
+
+    return rho_covar,rho_mean
+
+def add_frequency_decorrelation(out,comp,maps_constrained,pol=True) :
+#The unit conversion takes care of the scaling being done in uK_RJ. After scaling we convert to whatever the output units are.
+    conv2 = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
+
+    rho_cov,rho_m=get_decorrelation_matrices(out.output_frequency,comp.freq_ref,comp.corr_len)
+    if pol :
+        rho_cov_pol,rho_m_pol=get_decorrelation_matrices(out.output_frequency,comp.pol_freq_ref,comp.corr_len)
+    
+    if comp.corr_len>0 :
+        cl_tt,cl_ee,cl_bb,cl_te,cl_eb,cl_tb=hp.anafast(maps_constrained,pol=True)
+        x=np.array([hp.synfast([cl_tt,cl_ee,cl_bb,cl_te,cl_eb,cl_tb],out.nside,pol=True,new=True) 
+                    for f in out.output_frequency])
+        extra=np.zeros_like(x)
+        extra[:,0,:]=np.dot(rho_cov,x[:,0,:])
+        if pol :
+            extra[:,1,:]=np.dot(rho_cov_pol,x[:,1,:])
+            extra[:,2,:]=np.dot(rho_cov_pol,x[:,2,:])
+    else :
+        extra=0
+
+    maps_out=rho_m[:,:,None]*maps_constrained+extra
+    scaling_freq=scale_freqs(comp,out,pol=False)*conv2[:,None]
+    if pol :
+        scaling_freq_pol=scale_freqs(comp,out,pol=True )*conv2[:,None]
+
+    maps_out[:,0,:]*=scaling_freq
+    if pol :
+        maps_out[:,1,:]*=scaling_freq_pol
+        maps_out[:,2,:]*=scaling_freq_pol
+
+    return maps_out

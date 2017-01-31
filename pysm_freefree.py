@@ -1,7 +1,7 @@
-import healpy as hp
 import numpy as np
+import healpy as hp
+from pysm import scale_freqs, convert_units, output, component, add_frequency_decorrelation
 import ConfigParser
-from pysm import scale_freqs, convert_units, output, component
 
 def scale_ff_pop(i_pop,npop,out,Config) :
 
@@ -14,17 +14,18 @@ def scale_ff_pop(i_pop,npop,out,Config) :
                 print ''.join("%s: %s \n" % item   for item in vars(freefree).items())
                 print '----------------------------------------------------- \n'
         
-        conv_I = convert_units(freefree.template_units,out.output_units,out.output_frequency)
-	
-        scaled_map_ff = scale_freqs(freefree,out)*conv_I[...,np.newaxis]*freefree.em_template
-        scaled_map_ff_pol = np.zeros((2,np.asarray(out.output_frequency).size,hp.nside2npix(out.nside)))
+	maps_constrained=np.array([freefree.em_template*convert_units(freefree.template_units,['u','K_RJ'],freefree.freq_ref),
+				   np.zeros(len(freefree.em_template)),
+				   np.zeros(len(freefree.em_template))])
+
+	scaled_map_freefree=add_frequency_decorrelation(out,freefree,maps_constrained,pol=False)
 
         if out.debug == True:
-            ff = np.concatenate([scaled_map_ff[np.newaxis,...],scaled_map_ff_pol])
 	    for i in range(0,len(out.output_frequency)):
-		    hp.write_map(out.output_dir+out.output_prefix+'ff%d'%i_pop+'_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',ff[:,i,:],coord='G',column_units=out.output_units)
+		    hp.write_map(out.output_dir+out.output_prefix+'ff%d'%i_pop+'_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',
+				 scaled_map_freefree[i],coord='G',column_units=out.output_units)
 
-        return np.concatenate([scaled_map_ff[np.newaxis,...],scaled_map_ff_pol])
+        return np.transpose(scaled_map_freefree,axes=[1,0,2])
 
 def main(fname_config):
 

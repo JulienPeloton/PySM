@@ -1,8 +1,7 @@
-import ConfigParser
-import healpy as hp
 import numpy as np
-from pysm import scale_freqs, output, component, convert_units
-import matplotlib.pyplot as plt
+import healpy as hp
+from pysm import scale_freqs, convert_units, component, output, add_frequency_decorrelation
+import ConfigParser
 
 def scale_spdust_pop(i_pop,npop,out,Config) :
     
@@ -23,25 +22,27 @@ def scale_spdust_pop(i_pop,npop,out,Config) :
         print ''.join("%s: %s \n" % item   for item in vars(spdust1).items())
         print ''.join("%s: %s \n" % item   for item in vars(spdust2).items())
         print '----------------------------------------------------- \n'
-#Compute a map of the polarisation angle from the commander dust map polariationn angle. 
-    
+
+    #Compute a map of the polarisation angle from the commander dust map polariationn angle. 
     pol_angle = np.arctan2(spdust_general.thermaldust_polu,spdust_general.thermaldust_polq)
 
-#Units to do the scaling in MJysr and then bring the result back to the output units.
-    conv1 = convert_units(spdust1.template_units, ['u','K_RJ'], spdust1.freq_ref)
-    conv2 = convert_units(spdust2.template_units, ['u','K_RJ'], spdust2.freq_ref)
-    conv_end = convert_units(['u','K_RJ'],out.output_units,out.output_frequency)
-    unit_conversion1 = conv1*conv_end.reshape((len(out.output_frequency),1))
-    unit_conversion2 = conv2*conv_end.reshape((len(out.output_frequency),1))
-
-    scaled_map_spdust = scale_freqs(spdust1,out,pol=False)*spdust1.em_template*unit_conversion1 + scale_freqs(spdust2,out,pol=False)*spdust2.em_template*unit_conversion2
-    scaled_map_spdust_pol = scaled_map_spdust[np.newaxis,...]*np.asarray([np.cos(pol_angle),np.sin(pol_angle)])[:,np.newaxis,:]*spdust_general.pol_frac
+    map_i_1=spdust1.em_template*convert_units(spdust1.template_units,['u','K_RJ'],spdust1.freq_ref)
+    map_i_2=spdust2.em_template*convert_units(spdust2.template_units,['u','K_RJ'],spdust2.freq_ref)
+    maps_constrained_1=np.array([map_i_1,np.zeros_like(map_i_1),np.zeros_like(map_i_1)])
+    maps_constrained_2=np.array([map_i_2,np.zeros_like(map_i_2),np.zeros_like(map_i_2)])
+    scaled_map_1=add_frequency_decorrelation(out,spdust1,maps_constrained_1,pol=False)
+    scaled_map_2=add_frequency_decorrelation(out,spdust2,maps_constrained_2,pol=False)
+    scaled_map_spdust=scaled_map_1+scaled_map_2
+    scaled_map_spdust[:,1,:]=scaled_map_spdust[:,0,:]*(spdust_general.pol_frac*np.cos(pol_angle))[None,:]
+    scaled_map_spdust[:,2,:]=scaled_map_spdust[:,0,:]*(spdust_general.pol_frac*np.sin(pol_angle))[None,:]
 
     if out.debug == True:
         for i in range(0,len(out.output_frequency)):
-            hp.write_map(out.output_dir+out.output_prefix+'spdust%d'%i_pop+'_%d.fits'%(out.output_frequency[i]),scaled_map_spdust[i],coord='G',column_units=out.output_units)
+            hp.write_map(out.output_dir+out.output_prefix+'spdust%d'%i_pop+'_%d'%(out.output_frequency[i])+'_'+str(out.nside)+'.fits',
+                         scaled_map_spdust[i],coord='G',column_units=out.output_units)
 
-    return np.concatenate([scaled_map_spdust[np.newaxis,...],scaled_map_spdust_pol])
+    return np.transpose(scaled_map_spdust,axes=[1,0,2])
+
 
 def main(fname_config):
 

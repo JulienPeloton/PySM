@@ -1,5 +1,7 @@
 # Change Log
 
+- Frequency decorrelation enabled. Any component for which this is required should include a parameter corr_len and make that parameter > 0. We should discuss how to generate the random realizations (i.e. which power spectrum to use).
+
 ## [Unreleased](https://github.com/bthorne93/PySM/tree/HEAD)
 
 - Different seeds for CMB and noise [\#4](https://github.com/bthorne93/PySM/issues/4)
