@@ -429,7 +429,6 @@ def tprint(msg):
         if t0 is None: t0 = time.time()
         print >> sys.stderr, "%8.2f %s" % (time.time()-t0,msg)
 
-
 def get_decorrelation_matrices(freqs,freq_ref,corrlen) :
     if corrlen<=0 :
         rho_mean=np.ones([len(freqs),1])
@@ -443,19 +442,29 @@ def get_decorrelation_matrices(freqs,freq_ref,corrlen) :
         indref=np.where(freqtot==freq_ref)[0][0]
 
         def invert_safe(m) :
-            w,v=np.linalg.eigh(m); winv=1./w;
+            mb=m.copy()
+            w_ok=False
+            while not w_ok :
+                w,v=np.linalg.eigh(mb);
+                wmin=np.min(w);
+                if wmin>0 :
+                    w_ok=True
+                else :
+                    mb+=np.diag(2*np.max([1E-14,-wmin])*np.ones(len(mb)))
+            winv=1./w;
             return np.dot(v,np.dot(np.diag(winv),np.transpose(v)))
+
         corrmatrix=np.exp(-0.5*((np.log(freqtot[:,None])-np.log(freqtot[None,:]))/corrlen)**2)
-        corrmatrix+=np.diag(1E-16*np.ones_like(freqtot));
         rho_inv=invert_safe(corrmatrix)
         rho_uu=np.delete(np.delete(rho_inv,indref,axis=0),indref,axis=1);
         rho_uu=invert_safe(rho_uu)
         rho_inv_cu=rho_inv[:,indref]; rho_inv_cu=np.transpose(np.array([np.delete(rho_inv_cu,indref)]))
-        rho_uu_w,rho_uu_v=np.linalg.eig(rho_uu)
+        rho_uu_w,rho_uu_v=np.linalg.eigh(rho_uu);
 
-        rho_covar=np.dot(rho_uu_v,np.dot(np.diag(np.sqrt(np.maximum(np.zeros_like(rho_uu_w),rho_uu_w))),np.transpose(rho_uu_v)))
+        rho_covar=np.dot(rho_uu_v,np.dot(np.diag(np.sqrt(np.maximum(rho_uu_w,np.zeros_like(rho_uu_w)))),
+                                         np.transpose(rho_uu_v)))
         rho_mean=-np.dot(rho_uu,rho_inv_cu)
-		
+
         if not added_freq :
             rho_covar_new=np.zeros([len(freqtot),len(freqtot)])
             rho_mean_new=np.ones([len(freqtot),1])
@@ -477,20 +486,22 @@ def add_frequency_decorrelation(out,comp,maps_constrained,pol=True) :
     rho_cov,rho_m=get_decorrelation_matrices(out.output_frequency,comp.freq_ref,comp.corr_len)
     if pol :
         rho_cov_pol,rho_m_pol=get_decorrelation_matrices(out.output_frequency,comp.pol_freq_ref,comp.corr_len)
-    
-    if comp.corr_len>0 :
-        cl_tt,cl_ee,cl_bb,cl_te,cl_eb,cl_tb=hp.anafast(maps_constrained,pol=True)
-        x=np.array([hp.synfast([cl_tt,cl_ee,cl_bb,cl_te,cl_eb,cl_tb],out.nside,pol=True,new=True) 
-                    for f in out.output_frequency])
-        extra=np.zeros_like(x)
-        extra[:,0,:]=np.dot(rho_cov,x[:,0,:])
-        if pol :
-            extra[:,1,:]=np.dot(rho_cov_pol,x[:,1,:])
-            extra[:,2,:]=np.dot(rho_cov_pol,x[:,2,:])
-    else :
-        extra=0
 
-    maps_out=rho_m[:,:,None]*maps_constrained+extra
+    if comp.corr_len>0 :
+        extra=np.dot(rho_cov,np.random.randn(len(out.output_frequency)))
+        if pol :
+            extra_pol=np.dot(rho_cov_pol,np.random.randn(len(out.output_frequency)))
+    else :
+        extra=np.zeros(len(out.output_frequency))
+        if pol :
+            extra_pol=np.zeros(len(out.output_frequency))
+
+    maps_out=np.zeros([len(out.output_frequency),3,len(maps_constrained[0])])
+    maps_out[:,0,:]=(rho_m+extra[:,None])*maps_constrained[None,0,:]
+    if pol :
+        maps_out[:,1,:]=(rho_m_pol+extra_pol[:,None])*maps_constrained[None,1,:]
+        maps_out[:,2,:]=(rho_m_pol+extra_pol[:,None])*maps_constrained[None,2,:]
+
     scaling_freq=scale_freqs(comp,out,pol=False)*conv2[:,None]
     if pol :
         scaling_freq_pol=scale_freqs(comp,out,pol=True )*conv2[:,None]
