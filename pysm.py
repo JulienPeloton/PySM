@@ -5,6 +5,19 @@ from scipy.misc import factorial, comb
 from scipy.interpolate import interp1d
 import os
 
+paths = []
+for path in sys.path:
+	check = np.where('PySM' in path)[0]
+	if len(check) > 0: paths.append(path)
+
+if len(paths) > 0:
+	print 'PySM found in %d location(s): '%len(paths), paths
+	print 'Using the first entry (update your PYTHONPATH if you want another version)'
+	PYSMPATH = paths[0]
+else:
+	print 'PySM not found in the PYTHONPATH - setting to ./'
+	PYSMPATH = './'
+
 constants = {
     'T_CMB':2.7255,
     'h':6.62607004e-34,
@@ -81,10 +94,37 @@ def add_hierarch(lis):
             lis[i]= ('HIERARCH '+item[0],item[1])
     return lis
 
-def read_map_wrapped(fname,nside_out,field=0) :
+def insert_full_path(func):
+    """
+    Decorator to transform on-the-fly relative paths into absolute paths inside <func>
+    Useful if you are interfacing the PySM with other codes.
+    Just add @insert_full_path before the declaration of the relevant function.
+    """
+    def wrapper(*args, **kwargs):
+        args_tmp = []
+        for el in args:
+            if type(el) == str and el.split('/')[1] in ['Ancillaries','ConfigFiles']:
+                args_tmp.append(os.path.join(PYSMPATH,el))
+            else:
+                args_tmp.append(el)
+        args = tuple(args_tmp)
+        res = func(*args, **kwargs)
+        return res
+    return wrapper
+
+@insert_full_path
+def read_map_wrapped(fname,nside_out,field=0):
     return hp.ud_grade(np.array(hp.read_map(fname,field=field,verbose=False)),nside_out=nside_out)
-# Switch to this if you don't want to ud_grade on input
-#    return hp.read_map(fname,field=field,verbose=False)
+    # Switch to this if you don't want to ud_grade on input
+    # return hp.read_map(fname,field=field,verbose=False)
+
+@insert_full_path
+def read_conf_model(fname,Config_model):
+    return Config_model.read(fname)
+
+@insert_full_path
+def read_text_model(fname,unpack=True):
+    return np.loadtxt(fname,unpack=True)
 
 class component(object):
 
@@ -128,7 +168,7 @@ class component(object):
             self.compute_lensed_cmb = 'True' in cdict['compute_lensed_cmb']
             if self.compute_lensed_cmb == False: self.lensed_cmb = read_map_wrapped(cdict['lensed_cmb'],nside_out,field=(0,1,2))
         if 'emissivity' in keys:
-            self.emissivity = np.loadtxt(cdict['emissivity'],unpack=True)
+            self.emissivity = read_text_model(cdict['emissivity'],unpack=True)
         if 'freq_peak' in keys:
             try: self.freq_peak = float(cdict['freq_peak'])
             except ValueError: self.freq_peak = read_map_wrapped(cdict['freq_peak'],nside_out)
@@ -143,7 +183,7 @@ class component(object):
         if 'delens' in keys:
             self.delens = 'True' in cdict['delens']
         if 'delensing_ells' in keys:
-            self.delensing_ells = np.loadtxt(cdict['delensing_ells'],unpack=True)
+            self.delensing_ells = read_text_model(cdict['delensing_ells'],unpack=True)
         if 'ff_em_temp' in keys:
             self.em = read_map_wrapped(cdict['ff_em_temp'],nside_out)
         if 'ff_te_temp' in keys:

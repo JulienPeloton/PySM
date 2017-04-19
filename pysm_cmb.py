@@ -9,7 +9,7 @@ def main(fname_config):
 	Config = ConfigParser.ConfigParser()
 	Config.read(fname_config)
 	out = output(Config._sections['GlobalParameters'])
-	a=Config.read('./ConfigFiles/'+Config.get('CMB','model')+'_config.ini')
+	a = read_conf_model('./ConfigFiles/'+Config.get('CMB','model')+'_config.ini',Config)
 	if a==[] :
 		print 'Couldn\'t find file '+'./ConfigFiles/'+Config.get('CMB','model')+'_config.ini'
 		exit(1)
@@ -29,7 +29,7 @@ def main(fname_config):
 		print('Using taylens to compute temperature map.')
 		print '----------------------------------------------------- \n'
 		synlmax = 8*out.nside #this used to be user-defined.
-		data = np.transpose(np.loadtxt(CMB.specs))
+		data = np.transpose(read_text_model(CMB.specs))
 		lmax_cl = len(data[0])+1
 		l = np.arange(int(lmax_cl+1))
 		synlmax = min(synlmax, l[-1])

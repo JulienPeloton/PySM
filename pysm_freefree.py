@@ -1,6 +1,6 @@
 import numpy as np
 import healpy as hp
-from pysm import scale_freqs, convert_units, output, component, add_frequency_decorrelation
+from pysm import scale_freqs, convert_units, output, component, add_frequency_decorrelation, read_conf_model
 import ConfigParser
 
 def scale_ff_pop(i_pop,npop,out,Config) :
@@ -36,7 +36,7 @@ def main(fname_config):
         Config.read(fname_config)
         out = output(Config._sections['GlobalParameters'])
 
-        a=Config_model.read('./ConfigFiles/'+Config.get('FreeFree','model')+'_config.ini')
+	a = read_conf_model('./ConfigFiles/'+Config.get('FreeFree','model')+'_config.ini',Config_model)
 	if a==[] :
 		print 'Couldn\'t find file '+'./ConfigFiles/'+Config.get('FreeFree','model')+'_config.ini'
 		exit(1)
